@@ -49,3 +49,18 @@ class BascketService:
         async with uow:
             await uow.bascket.delete_obj(uuid_id=uuid_id)
             await uow.commit()
+
+    async def create_or_update_bascket(
+        self, uow: IUnitOfWork, uuid_id: str, bascket_data: BasketPydantic
+    ) -> Basket:
+        bascket_dict = bascket_data.model_dump()
+        async with uow:
+            try:
+                bascket = await uow.bascket.create_or_update(uuid_id=uuid_id, data=bascket_dict)
+                await uow.commit()
+                return bascket
+            except IntegrityError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Ошибка при создании или обновлении корзины {uuid_id!r}.",
+                )
