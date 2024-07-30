@@ -58,7 +58,6 @@ class BasketPydantic(BaseModel):
     ] = None
 
 
-
 # ========================================================================
 # модель ордера
 # from enum import Enum

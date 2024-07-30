@@ -20,4 +20,9 @@ async def start_test():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=5001, reload=True)
+    uvicorn.run(
+        app=settings.app,
+        host=settings.host,
+        port=settings.port,
+        reload=settings.reload_flag,
+    )

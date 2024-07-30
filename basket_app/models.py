@@ -1,9 +1,11 @@
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.types import JSON 
+from sqlalchemy.types import JSON
+
 # from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core import Base
+
 
 class Basket(Base):
     __table_args__ = (
@@ -33,7 +35,6 @@ class Basket(Base):
 
     def __repr__(self):
         return str(self)
-
 
 
 # ========================================================================

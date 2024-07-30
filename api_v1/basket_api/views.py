@@ -8,6 +8,7 @@ from basket_app.bascket_service import BascketService
 
 router = APIRouter(tags=["Bascket"])
 
+
 # CREATE        === === === === === === === ===
 @router.post(
     "/",
@@ -26,6 +27,7 @@ async def create_bascket(
         )
         return response_msg
 
+
 # GET ALL       === === === === === === === ===
 @router.get(
     "/",
@@ -34,6 +36,7 @@ async def create_bascket(
 async def get_basckets(uow: UOF_Depends):
     return await BascketService().get_baskets(uow)
 
+
 # GET           === === === === === === === ===
 @router.get(
     "/{uuid_id}/",
@@ -41,6 +44,7 @@ async def get_basckets(uow: UOF_Depends):
 )
 async def get_bascket_by_uuid(uuid_id: str, uow: UOF_Depends):
     return await BascketService().get_bascket_by_uuid(uow=uow, uuid_id=uuid_id)
+
 
 # UPDATE PUT    === === === === === === === ===
 @router.put(
@@ -56,6 +60,7 @@ async def update_bascket(
         uow=uow, uuid_id=uuid_id, bascket_update=bascket_update
     )
 
+
 # UPDATE PATCH  === === === === === === === ===
 @router.patch(
     "/{uuid_id}/",
@@ -69,6 +74,7 @@ async def update_bascket(
     return await BascketService().update_bascket(
         uow=uow, uuid_id=uuid_id, bascket_update=bascket_update, partial=True
     )
+
 
 # DELETE        === === === === === === === ===
 @router.delete(
