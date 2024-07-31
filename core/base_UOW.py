@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from core.db_manager import db_manager
 
 from basket_app.bascket_repository import BascketRepository
+from order_app.order_repository import OrderRepository
 
 
 class IUnitOfWork(ABC):
@@ -31,6 +32,7 @@ class UnitOfWork:
         self.session = self.session_factory()
         # для работы
         self.bascket = BascketRepository(self.session)
+        self.order = OrderRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.session.close()
