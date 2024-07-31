@@ -2,7 +2,7 @@ import re
 
 from datetime import datetime
 from typing import Annotated, List, Dict
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SimpleMSGErrorPydantic(BaseModel):
