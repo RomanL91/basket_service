@@ -8,7 +8,7 @@ class BascketRepository(SQLAlchemyRepository):
     async def create_or_update(self, uuid_id: str, data: dict):
         # Пытаемся найти объект по UUID
         existing_obj = await self.get_obj(uuid_id=uuid_id)
-        
+
         if existing_obj is None:
             # Если объект не найден, создаем новый
             return await self.create_obj(data)
