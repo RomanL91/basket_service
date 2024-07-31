@@ -51,8 +51,8 @@ class SQLAlchemyRepository(AbstractRepository):
             res = await self.session.execute(stmt)
             res = res.scalar_one()
             return res
-        except NoResultFound:
-            return None
+        except NoResultFound as e:
+            raise NoResultFound(e)
 
     async def update_obj(self, uuid_id: str, data: dict):
         stmt = (
