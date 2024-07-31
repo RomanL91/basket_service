@@ -22,7 +22,7 @@ class BasketPydantic(BaseModel):
         ),
     ] = None
     user_id: Annotated[
-        int | None,
+        int | str | None,
         Field(
             ...,
             description="Уникальный ID пользователя",
