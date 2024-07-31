@@ -44,9 +44,9 @@ class BascketService:
     ) -> Basket:
         data = bascket_update.model_dump(exclude_unset=partial)
         async with uow:
-            user = await uow.bascket.update_obj(uuid_id=uuid_id, data=data)
+            bascket = await uow.bascket.update_obj(uuid_id=uuid_id, data=data)
             await uow.commit()
-            return user
+            return bascket
 
     async def delete_bascket(self, uow: IUnitOfWork, uuid_id: str) -> None:
         async with uow:
