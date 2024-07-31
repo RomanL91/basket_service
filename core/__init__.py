@@ -8,3 +8,4 @@ from .base_model import Base
 
 # for migrations
 from basket_app.models import Basket
+from order_app.models import Order
