@@ -17,6 +17,7 @@ class SettingsDataBase(BaseModel):
 
 class SettingsAuth(BaseModel):
     public_key_path: Path = BASE_DIR / "certs" / "public.pem"
+    public_key: str = public_key_path.read_text()
     algorithm: str = "RS256"
 
 
