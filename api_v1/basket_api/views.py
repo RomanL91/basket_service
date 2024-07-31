@@ -38,7 +38,7 @@ async def create_bascket(
     response_model=list[schemas.BasketPydantic],
     summary="Получение списка корзин.",
     description="Можно получить список всех корзин. А нафиг? Пока пусть будет.",
-    deprecated=True,
+    # deprecated=True,
 )
 async def get_basckets(uow: UOF_Depends):
     return await BascketService().get_baskets(uow)
