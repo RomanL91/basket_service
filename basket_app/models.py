@@ -28,53 +28,10 @@ class Basket(Base):
         JSON,
         default=list,
     )
-    # orders = relationship("Order", back_populates="basket")
+    orders = relationship("Order", back_populates="basket")
 
     def __str__(self):
         return f"Basket id={self.id}, uuid_id={self.uuid_id!r})"
 
     def __repr__(self):
         return str(self)
-
-
-# ========================================================================
-# модель ордера
-# from enum import Enum
-
-# # Определение перечисления для типов доставки
-# class DeliveryType(Enum):
-#     PICKUP = "Самовывоз"
-#     DELIVERY = "Доставка продавца"
-
-
-# class Order(Base):
-#     uuid_id: Mapped[str] = mapped_column(
-#         ForeignKey("baskets.uuid_id"),
-#         unique=True,
-#     )
-#     order_status: Mapped[str] = mapped_column()
-#     comment: Mapped[str] = mapped_column(
-#         Text,
-#         nullable=True,
-#     )
-#     phone_number: Mapped[str] = mapped_column()  # Номер телефона для контакта
-#     shipping_city: Mapped[str] = mapped_column()  # Город отгрузки
-#     delivery_address: Mapped[str] = mapped_column()  # Адрес доставки
-#     delivery_type: Mapped[DeliveryType] = mapped_column(
-#         SQLEnum(DeliveryType),
-#     )  # Тип доставки, например "Самовывоз" или "Доставка продавца"
-#     # Связь с моделью корзины
-#     basket: Mapped["Basket"] = relationship(
-#         "Basket",
-#         back_populates="orders",
-#     )
-#     completed: Mapped[bool] = mapped_column(
-#         default=False,
-#         nullable=True,
-#     )
-
-#     def __str__(self):
-#         return f"Order id={self.id}, uuid_id={self.uuid_id!r})"
-
-#     def __repr__(self):
-#         return str(self)
