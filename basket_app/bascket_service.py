@@ -30,7 +30,7 @@ class BascketService:
 
     async def get_bascket_by_uuid(self, uow: IUnitOfWork, uuid_id: str) -> Basket:
         async with uow:
-            return await uow.bascket.get_obj(uuid_id=uuid_id)
+            return await uow.bascket.get_obj(uuid_id=uuid_id, completed=False)
 
     async def update_bascket(
         self,
@@ -56,7 +56,9 @@ class BascketService:
         bascket_dict = bascket_data.model_dump()
         async with uow:
             try:
-                bascket = await uow.bascket.create_or_update(uuid_id=uuid_id, data=bascket_dict)
+                bascket = await uow.bascket.create_or_update(
+                    uuid_id=uuid_id, data=bascket_dict
+                )
                 await uow.commit()
                 return bascket
             except IntegrityError as e:
