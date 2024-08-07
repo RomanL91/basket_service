@@ -10,6 +10,11 @@ from datetime import datetime
 from core import settings
 
 
+# функция получения времени
+def get_current_time(self):
+    return datetime.now(settings.time_zone).replace(tzinfo=None)
+
+
 class Base(DeclarativeBase):
     __abstract__ = True
 
@@ -21,11 +26,11 @@ class Base(DeclarativeBase):
         primary_key=True,
     )
     created_at: Mapped[datetime] = mapped_column(
-        default=lambda: datetime.now(settings.time_zone),
+        default=get_current_time,
         nullable=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=lambda: datetime.now(settings.time_zone),
-        onupdate=lambda: datetime.now(settings.time_zone),
+        default=get_current_time,
+        onupdate=get_current_time,
         nullable=True,
     )
