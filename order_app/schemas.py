@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from enum import Enum
+from typing import Annotated
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # Определение перечисления для типов доставки, аналогичное SQLAlchemy
@@ -9,18 +9,71 @@ class DeliveryType(str, Enum):
     PICKUP = "PICKUP"
 
 
+class OrderStatusType(str, Enum):
+    NEW = "NEW"
+    INWORK = "INWORK"
+    COMPLITED = "COMPLITED"
+
+
 # Pydantic модель
 class OrderPydantic(BaseModel):
-    uuid_id: str = Field(
-        ..., description="Уникальный идентификатор заказа, связанный с корзиной"
-    )
-    order_status: str = Field(..., description="Текущий статус заказа")
-    comment: Optional[str] = Field(None, description="Комментарий к заказу")
-    phone_number: str = Field(..., description="Номер телефона для контакта")
-    shipping_city: str = Field(..., description="Город отгрузки")
-    delivery_address: Optional[str] = Field(None, description="Адрес доставки")
-    delivery_type: Optional[DeliveryType] = Field(None, description="Тип доставки")
-    completed: bool = Field(False, description="Статус завершённости заказа")
-    basket_uuid: str = Field(
-        ..., description="Уникальный идентификатор корзины, связанной с заказом"
-    )
+    model_config = ConfigDict(strict=True)
+
+    uuid_id: Annotated[
+        str,
+        Field(
+            ...,
+            description="Уникальный идентификатор заказа, наследуется от корзины.",
+            examples=["fcff9649-c7cc-498c-8ee2-c84785a68521"],
+        ),
+    ]
+    order_status: Annotated[
+        OrderStatusType | str,
+        Field(
+            ...,
+            description="Текущий статус заказа. Значение по умолчанию NEW.",
+            examples=[OrderStatusType.NEW],
+        ),
+    ] = OrderStatusType.NEW
+    phone_number: Annotated[
+        str,
+        Field(
+            ...,
+            description="Номер телефона для контакта.",
+            examples=["+77714658976"],
+        ),
+    ]
+    comment: Annotated[
+        str | None,
+        Field(
+            ...,
+            description="Комментарий к заказу.",
+            examples=[
+                "Очень жду доставку. Если что, вот мой другой номер - +77782346754."
+            ],
+        ),
+    ]
+    delivery_type: Annotated[
+        DeliveryType | str,
+        Field(
+            ...,
+            description="Тип доставки (выбирает пользователь, по умолчанию - силами продовца).",
+            examples=[DeliveryType.DELIVERY],
+        ),
+    ] = DeliveryType.DELIVERY
+    shipping_city: Annotated[
+        str,
+        Field(
+            ...,
+            description="Город отгрузки (важно: выбор делает софт, не пользователь).",
+            examples=["Астана"],
+        ),
+    ]
+    delivery_address: Annotated[
+        str | None,
+        Field(
+            ...,
+            description="Адрес доставки (указывает пользователь, форма свободная).",
+            examples=["Улица Достык, 8/4."],
+        ),
+    ]
