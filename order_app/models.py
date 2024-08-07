@@ -1,51 +1,45 @@
-from enum import Enum
-
 from sqlalchemy import Enum as SQLEnum
-
 from sqlalchemy import ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # from sqlalchemy.dialects.postgresql import JSON
 
-from basket_app.models import Basket
 from core import Base
-
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-
-# Определение перечисления для типов доставки
-class DeliveryType(Enum):
-    PICKUP = "PICKUP"
-    DELIVERY = "DELIVERY"
+from order_app.schemas import DeliveryType, OrderStatusType
 
 
 class Order(Base):
+    # унаследуем от корзины
     uuid_id: Mapped[str] = mapped_column(
         ForeignKey("baskets.uuid_id"),
         unique=True,
     )
-    order_status: Mapped[str] = mapped_column()
+    # статус заявки [новая, в работе, выполнена]
+    order_status: Mapped[OrderStatusType] = mapped_column(
+        SQLEnum(OrderStatusType), default=OrderStatusType.NEW
+    )
+    # комментарий к заявке от пользователя
     comment: Mapped[str] = mapped_column(
         Text,
         nullable=True,
     )
-    phone_number: Mapped[str] = mapped_column()  # Номер телефона для контакта
-    shipping_city: Mapped[str] = mapped_column()  # Город отгрузки
+    # Номер телефона для контакта
+    phone_number: Mapped[str] = mapped_column()
+    # Город отгрузки
+    shipping_city: Mapped[str] = mapped_column()
+    # Адрес доставки
     delivery_address: Mapped[str] = mapped_column(
         nullable=True,
-    )  # Адрес доставки
+    )
+    # Тип доставки, например "Самовывоз" или "Доставка продавца"
     delivery_type: Mapped[DeliveryType] = mapped_column(
         SQLEnum(DeliveryType),
         nullable=True,
-    )  # Тип доставки, например "Самовывоз" или "Доставка продавца"
+    )
     # Связь с моделью корзины
-    basket: Mapped["Basket"] = relationship(
+    basket: Mapped["Basket"] = relationship(  # type: ignore
         "Basket",
         back_populates="orders",
-    )
-    completed: Mapped[bool] = mapped_column(
-        default=False,
-        nullable=True,
     )
 
     def __str__(self):
