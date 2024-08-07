@@ -20,6 +20,8 @@ pyjwt = {extras = ["crypto"], version = "^2.8.0"}
 pytz = "^2024.1"
 requests = "^2.32.3"
 tzdata = "^2024.1"
+psycopg2 = "^2.9.9"
+asyncpg = "^0.29.0"
 
 
 [build-system]
