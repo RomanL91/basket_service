@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import (
 
 
 class DataBaseManager:
-    def __init__(self, url: str, echo: bool) -> None:
-        self.engine = create_async_engine(url=url, echo=echo)
+    def __init__(self, url: str, echo: bool, future: bool = False) -> None:
+        self.engine = create_async_engine(url=url, echo=echo, future=future)
         self.session_factory = async_sessionmaker(
             bind=self.engine,
             autoflush=False,
@@ -37,4 +37,6 @@ class DataBaseManager:
         await session.close()
 
 
-db_manager = DataBaseManager(url=settings.db.url, echo=settings.db.echo)
+db_manager = DataBaseManager(
+    url=settings.db.url, echo=settings.db.echo, future=settings.db.future
+)
