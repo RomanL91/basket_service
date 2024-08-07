@@ -116,8 +116,13 @@ async def delete_bascket(uow: UOF_Depends, uuid_id: str) -> None:
     response_model=schemas.BasketPydantic,
     summary="Создай или обнови корзину.",
     description="""Создаст новую корзину, если она не существует, 
-                или обновит существующию. Из обязательно 'uuid_id'.""",
-    responses={500: {"description": "Да пошел ты!"}},
+                или обновит существующию. Из обязательно 'uuid_id' и basket_items 
+                не пустой. Если с товаром идет подарок - то указать как 'gift_prod_id'.
+                """,
+    responses={
+        404: {"description": "Сам виноват."},
+        500: {"description": "Да пошел ты!"},
+    },
     response_description="Информация о корзине.",
 )
 async def create_or_update_basket(
@@ -130,8 +135,8 @@ async def create_or_update_basket(
         return await BascketService().create_or_update_bascket(
             uow=uow, uuid_id=uuid_id, bascket_data=new_bascket
         )
-    except NoResultFound as error:
+    except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Корзина с UUID {uuid_id!r} не найдена.",
+            detail=f"Ошибка? -> {error!r}.",
         )
