@@ -50,3 +50,9 @@ class OrdertService:
         async with uow:
             await uow.order.delete_obj(uuid_id=uuid_id)
             await uow.commit()
+
+    async def get_info_order_with_basket(self, uow: IUnitOfWork, uuid_id: str):
+        async with uow:
+            res = await uow.order.get_info_order_with_basket(uuid_id=uuid_id)
+            await uow.commit()
+            return res
