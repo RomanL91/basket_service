@@ -14,7 +14,7 @@ class SettingsDataBase(BaseModel):
     # for example "postgresql://user:password@localhost/dbname"
     # url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
     url: str = (
-        "postgresql+asyncpg://MyBasketUser:MyBasketPassword@localhost:5433/MyBasketDataBase"
+        "postgresql+asyncpg://MyBasketUser:MyBasketPassword@postgres:5432/MyBasketDataBase"
     )
     echo: bool = True  # Для дебага
     future: bool = True
@@ -61,9 +61,9 @@ class SettingsApiShop(BaseModel):
 class Settings(BaseSettings):
     # == start app
     app: str = "main:app"
-    host: str = "127.0.0.1"
-    port: int = 5001
-    reload_flag: bool = True
+    host: str = "0.0.0.0"
+    port: int = 8989
+    reload_flag: bool = False
 
     # == other
     api_v1_prefix: str = "/basket_api/v1"
