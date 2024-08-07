@@ -1,6 +1,3 @@
-import re
-
-from datetime import datetime
 from typing import Annotated, List, Dict
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,14 +8,36 @@ class SimpleMSGErrorPydantic(BaseModel):
 
 
 class BasketPydantic(BaseModel):
-    model_config = ConfigDict(strict=True)
+    model_config = ConfigDict(
+        strict=True,
+        json_schema_extra={
+            "example": {
+                "uuid_id": "fcff9649-c7cc-498c-8ee2-c84785a68521",
+                # "user_id": 789,
+                # "completed": False,
+                "basket_items": [
+                    {
+                        "prod_id": 1,
+                        "count": 5,
+                        "price": 799,
+                    },
+                    {
+                        "prod_id": 2,
+                        "count": 3,
+                        "price": 4599,
+                        "gift_prod_id": 1,
+                    },
+                ],
+                # gift_items не включается в пример
+            }
+        },
+    )
 
     uuid_id: Annotated[
         str,
         Field(
             ...,
             description="Уникальный ID с клиента",
-            examples=["fcff9649-c7cc-498c-8ee2-c84785a68521"],
         ),
     ] = None
     user_id: Annotated[
@@ -26,7 +45,6 @@ class BasketPydantic(BaseModel):
         Field(
             ...,
             description="Уникальный ID пользователя",
-            examples=[789],
         ),
     ] = None
     completed: Annotated[
@@ -38,21 +56,18 @@ class BasketPydantic(BaseModel):
         ),
     ] = False
     basket_items: Annotated[
-        List[Dict[str, int]] | None,
+        # TODO улучшить аннотацию
+        List[Dict[str, str | int | dict | list]] | None,
         Field(
             ...,
             description="Состав корзины",
-            example=[
-                {
-                    "prod_id": 1,
-                    "count": 5,
-                    "price": 799,
-                },
-                {
-                    "prod_id": 2,
-                    "count": 3,
-                    "price": 4599,
-                },
-            ],
+        ),
+    ] = None
+    gift_items: Annotated[
+        # TODO улучшить аннотацию
+        List[Dict[str, str | int | Dict | List | None]] | None,
+        Field(
+            ...,
+            description="Список подарков",
         ),
     ] = None
