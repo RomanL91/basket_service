@@ -6,6 +6,7 @@ from sqlalchemy.exc import NoResultFound
 from order_app import schemas
 from api_v1.order_api.depends import UOF_Depends
 from order_app.order_service import OrdertService
+
 # TODO этот импорт не совсем уместен, нужен базовый класс пидантик исключений
 # а не таскать эту схему во все приложения
 from basket_app.schemas import SimpleMSGErrorPydantic
@@ -94,3 +95,26 @@ async def update_order(
 )
 async def delete_order(uow: UOF_Depends, uuid_id: str) -> None:
     await OrdertService().delete_order(uow=uow, uuid_id=uuid_id)
+
+
+# GET           === === === === === === === ===
+@router.get(
+    "/info_with_basket/{uuid_id}/",
+    # response_model=schemas.OrderResponse, # TODO сюда нужна пидантик модель
+    summary="Получение экземпляра ордера по uuid_id с детальной информацией о корзине.",
+    # description="""Нужен uuid_id для получения экземпляра ордера.
+    #             Вернет ордер с completed = False""",
+)
+async def get_info_order_with_basket(
+    uuid_id: str,
+    uow: UOF_Depends,
+):
+    try:
+        return await OrdertService().get_info_order_with_basket(
+            uow=uow, uuid_id=uuid_id
+        )
+    except NoResultFound as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Ордер с UUID {uuid_id!r} не найден.",
+        )
