@@ -1,8 +1,8 @@
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.types import JSON
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core import Base
 
@@ -27,8 +27,17 @@ class Basket(Base):
     basket_items: Mapped[list] = mapped_column(
         JSON,
         default=list,
+        nullable=True,
     )
-    orders = relationship("Order", back_populates="basket")
+    gift_items: Mapped[list] = mapped_column(
+        JSON,
+        default=list,
+        nullable=True,
+    )
+    orders: Mapped["Order"] = relationship(  # type: ignore
+        "Order",
+        back_populates="basket",
+    )
 
     def __str__(self):
         return f"Basket id={self.id}, uuid_id={self.uuid_id!r})"
