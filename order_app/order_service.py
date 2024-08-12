@@ -3,10 +3,12 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 # == My
-from core import settings
 from core.base_UOW import IUnitOfWork
 from order_app.models import Order
 from order_app.schemas import OrderPydantic
+
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 
 class OrdertService:
@@ -56,3 +58,9 @@ class OrdertService:
             res = await uow.order.get_info_order_with_basket(uuid_id=uuid_id)
             await uow.commit()
             return res
+
+    async def get_paginated_orders(self, uow: IUnitOfWork, params: Params) -> Page:
+        async with uow:
+            query = uow.order.get_query()  # Получаем базовый запрос на объекты Order
+            result = await paginate(uow.session, query, params)
+            return result
