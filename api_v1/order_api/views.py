@@ -1,11 +1,13 @@
+from fastapi_pagination import Page
 from fastapi import APIRouter, Response, HTTPException, status
 
 from sqlalchemy.exc import NoResultFound
 
 # == My
 from order_app import schemas
-from api_v1.order_api.depends import UOF_Depends
+from api_v1.order_api.depends import UOF_Depends, Params_Depends
 from order_app.order_service import OrdertService
+
 
 # TODO этот импорт не совсем уместен, нужен базовый класс пидантик исключений
 # а не таскать эту схему во все приложения
@@ -42,10 +44,30 @@ async def create_order(
     response_model=list[schemas.OrderPydantic],
     summary="Получение всех ордеров.",
     description="Скорее всего это не пригодиться, но пусть пока будет.",
-    # deprecated=True,
+    deprecated=True,
 )
 async def get_orders(uow: UOF_Depends):
     return await OrdertService().get_orders(uow)
+
+
+# GET ALL WITH PAGINATED    === === === === ===
+@router.get(
+    "/all/",
+    response_model=Page[schemas.OrderPydantic],
+    summary="Получение всех ордеров с пагинацией.",
+    description="""
+    Данный endpoint возвращает список ордеров с пагинацией. 
+    Можно не переживать о расходе памяти, так как мы не выгружаем из БД
+    все ордера в память устройства. Вместо этого оно выполняет SQL-запрос, 
+    который включает в себя LIMIT и OFFSET, чтобы получить только нужные 
+    записи для конкретной страницы. 
+    """,
+)
+async def get_orders(
+    uow: UOF_Depends,
+    params: Params_Depends,
+):
+    return await OrdertService().get_paginated_orders(uow, params)
 
 
 # GET           === === === === === === === ===
