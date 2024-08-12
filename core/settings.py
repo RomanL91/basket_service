@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     app: str = "main:app"
     host: str = "0.0.0.0"
     port: int = 8989
-    reload_flag: bool = False
+    reload_flag: bool = True
 
     # == other
     api_v1_prefix: str = "/basket_api/v1"
