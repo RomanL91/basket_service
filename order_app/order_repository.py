@@ -8,6 +8,9 @@ from core.base_repository import SQLAlchemyRepository
 class OrderRepository(SQLAlchemyRepository):
     model = Order
 
+    def get_query(self):
+        return select(self.model).order_by(self.model.id)
+
     async def get_info_order_with_basket(self, uuid_id: str):
         stmt = (
             select(Order)
