@@ -78,19 +78,19 @@ class OrderPydantic(BaseModel):
             examples=["Улица Достык, 8/4."],
         ),
     ]
-    created_at: Annotated[
-        datetime | None,
-        Field(
-            ...,
-            description="Время создания ордера в системе.",
-            examples=["2024-08-07T23:54:51.628882"],
-        ),
-    ]
-    updated_at: Annotated[
-        datetime | None,
-        Field(
-            ...,
-            description="Время обновления ордера в системе.",
-            examples=["2024-08-07T23:54:51.628882"],
-        ),
-    ]
+    # created_at: Annotated[
+    #     datetime | None,
+    #     Field(
+    #         ...,
+    #         description="Время создания ордера в системе.",
+    #         examples=["2024-08-07T23:54:51.628882"],
+    #     ),
+    # ]
+    # updated_at: Annotated[
+    #     datetime | None,
+    #     Field(
+    #         ...,
+    #         description="Время обновления ордера в системе.",
+    #         examples=["2024-08-07T23:54:51.628882"],
+    #     ),
+    # ]
