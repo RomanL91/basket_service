@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Annotated
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -75,5 +76,21 @@ class OrderPydantic(BaseModel):
             ...,
             description="Адрес доставки (указывает пользователь, форма свободная).",
             examples=["Улица Достык, 8/4."],
+        ),
+    ]
+    created_at: Annotated[
+        datetime | None,
+        Field(
+            ...,
+            description="Время создания ордера в системе.",
+            examples=["2024-08-07T23:54:51.628882"],
+        ),
+    ]
+    updated_at: Annotated[
+        datetime | None,
+        Field(
+            ...,
+            description="Время обновления ордера в системе.",
+            examples=["2024-08-07T23:54:51.628882"],
         ),
     ]
