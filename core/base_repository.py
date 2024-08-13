@@ -61,9 +61,12 @@ class SQLAlchemyRepository(AbstractRepository):
             .filter_by(uuid_id=uuid_id)
             .returning(self.model)
         )
-        res = await self.session.execute(stmt)
-        return res.scalar_one()
-
+        try:
+            res = await self.session.execute(stmt)
+            return res.scalar_one()
+        except NoResultFound as e:
+            raise NoResultFound(e)
+        
     async def delete_obj(self, **filter_by) -> None:
         stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(stmt)

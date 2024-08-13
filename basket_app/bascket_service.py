@@ -3,7 +3,7 @@ import httpx
 
 # == Exceptions
 from fastapi import HTTPException, status
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 # == My
 from core import settings
@@ -52,9 +52,15 @@ class BascketService:
     ) -> Basket:
         data = bascket_update.model_dump(exclude_unset=partial)
         async with uow:
-            bascket = await uow.bascket.update_obj(uuid_id=uuid_id, data=data)
-            await uow.commit()
-            return bascket
+            try:
+                bascket = await uow.bascket.update_obj(uuid_id=uuid_id, data=data)
+                await uow.commit()
+                return bascket
+            except NoResultFound as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Корзины {uuid_id!r} не существует.",
+                )
 
     async def delete_bascket(self, uow: IUnitOfWork, uuid_id: str) -> None:
         async with uow:
