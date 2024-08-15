@@ -33,7 +33,7 @@ class OrdertService:
 
     async def get_order_by_uuid(self, uow: IUnitOfWork, uuid_id: str) -> Order:
         async with uow:
-            return await uow.order.get_obj(uuid_id=uuid_id, completed=False)
+            return await uow.order.get_obj(uuid_id=uuid_id)
 
     async def update_order(
         self,
