@@ -59,8 +59,12 @@ class OrdertService:
             await uow.commit()
             return res
 
-    async def get_paginated_orders(self, uow: IUnitOfWork, params: Params, order_status: OrderStatusType) -> Page:
+    async def get_paginated_orders(
+        self, uow: IUnitOfWork, params: Params, order_status: OrderStatusType
+    ) -> Page:
         async with uow:
-            query = uow.order.get_query_orders(order_status)  # Получаем базовый запрос на объекты Order
+            query = uow.order.get_query_orders(
+                order_status
+            )  # Получаем базовый запрос на объекты Order
             result = await paginate(uow.session, query, params)
             return result
