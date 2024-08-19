@@ -89,6 +89,14 @@ class OrderPydantic(BaseModel):
             examples=["Иванов Иван"],
         ),
     ] = None
+    manager_executive_id: Annotated[
+        str | None,
+        Field(
+            ...,
+            description="ИД менеджера, принявщего заявку.",
+            examples=[34],
+        ),
+    ] = None
     manager_mailbox: Annotated[
         str | None,
         Field(
@@ -97,22 +105,22 @@ class OrderPydantic(BaseModel):
             examples=["Ivanov@example.com"],
         ),
     ] = None
-    created_at: Annotated[
-        datetime | None,
-        Field(
-            ...,
-            description="Время создания ордера в системе.",
-            examples=["2024-08-07T23:54:51.628882"],
-        ),
-    ] = None
-    updated_at: Annotated[
-        datetime | None,
-        Field(
-            ...,
-            description="Время обновления ордера в системе.",
-            examples=["2024-08-07T23:54:51.628882"],
-        ),
-    ] = None
+    # created_at: Annotated[
+    #     datetime | None,
+    #     Field(
+    #         ...,
+    #         description="Время создания ордера в системе.",
+    #         examples=["2024-08-07T23:54:51.628882"],
+    #     ),
+    # ] = None
+    # updated_at: Annotated[
+    #     datetime | None,
+    #     Field(
+    #         ...,
+    #         description="Время обновления ордера в системе.",
+    #         examples=["2024-08-07T23:54:51.628882"],
+    #     ),
+    # ] = None
 
 
 class CreateOrderPydantic(OrderPydantic):
@@ -135,7 +143,8 @@ class CreateOrderPydantic(OrderPydantic):
 
 
 class ReadOrderPydantic(OrderPydantic):
-    pass
+    created_at: datetime | None
+    updated_at: datetime | None
 
 
 class UpdateOrderPydantic(OrderPydantic):
