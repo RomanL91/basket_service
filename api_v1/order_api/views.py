@@ -26,7 +26,7 @@ router = APIRouter(tags=["Order"])
     description="Создай ордер. Смотри пример тела.",
 )
 async def create_order(
-    new_order: schemas.OrderPydantic, uow: UOF_Depends, response: Response
+    new_order: schemas.CreateOrderPydantic, uow: UOF_Depends, response: Response
 ):
     try:
         return await OrdertService().create_order(uow=uow, new_order=new_order)
@@ -41,7 +41,7 @@ async def create_order(
 # GET ALL       === === === === === === === ===
 @router.get(
     "/",
-    response_model=list[schemas.OrderPydantic],
+    response_model=list[schemas.ReadOrderPydantic],
     summary="Получение всех ордеров.",
     description="Скорее всего это не пригодиться, но пусть пока будет.",
     deprecated=True,
@@ -66,8 +66,9 @@ async def get_orders(uow: UOF_Depends):
 async def get_orders(
     uow: UOF_Depends,
     params: Params_Depends,
+    order_status: schemas.OrderStatusType = schemas.OrderStatusType.NEW,
 ):
-    return await OrdertService().get_paginated_orders(uow, params)
+    return await OrdertService().get_paginated_orders(uow, params, order_status)
 
 
 # GET           === === === === === === === ===
