@@ -41,6 +41,12 @@ class Order(Base):
         "Basket",
         back_populates="orders",
     )
+    manager_executive: Mapped[str] = mapped_column(
+        nullable=True,
+    )
+    manager_mailbox: Mapped[str] = mapped_column(
+        nullable=True,
+    )
 
     def __str__(self):
         return f"Order id={self.id}, uuid_id={self.uuid_id!r})"
