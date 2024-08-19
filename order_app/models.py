@@ -44,6 +44,9 @@ class Order(Base):
     manager_executive: Mapped[str] = mapped_column(
         nullable=True,
     )
+    manager_executive_id: Mapped[str] = mapped_column(
+        nullable=True,
+    )
     manager_mailbox: Mapped[str] = mapped_column(
         nullable=True,
     )
