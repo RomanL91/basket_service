@@ -11,7 +11,7 @@ from core import settings
 
 
 # функция получения времени
-def get_current_time(self):
+def get_current_time():
     return datetime.now(settings.time_zone).replace(tzinfo=None)
 
 
