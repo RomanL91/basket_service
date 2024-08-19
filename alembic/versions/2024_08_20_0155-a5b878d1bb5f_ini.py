@@ -1,8 +1,8 @@
-"""init
+"""ini
 
-Revision ID: b50a8ba348bb
+Revision ID: a5b878d1bb5f
 Revises: 
-Create Date: 2024-08-07 23:51:21.718157
+Create Date: 2024-08-20 01:55:13.793611
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "b50a8ba348bb"
+revision: str = "a5b878d1bb5f"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,7 +40,13 @@ def upgrade() -> None:
         sa.Column("uuid_id", sa.String(), nullable=False),
         sa.Column(
             "order_status",
-            sa.Enum("NEW", "INWORK", "COMPLITED", name="orderstatustype"),
+            sa.Enum(
+                "NEW",
+                "INWORK",
+                "COMPLITED",
+                "CANCELED",
+                name="orderstatustype",
+            ),
             nullable=False,
         ),
         sa.Column("comment", sa.Text(), nullable=True),
@@ -52,6 +58,9 @@ def upgrade() -> None:
             sa.Enum("DELIVERY", "PICKUP", name="deliverytype"),
             nullable=True,
         ),
+        sa.Column("manager_executive", sa.String(), nullable=True),
+        sa.Column("manager_executive_id", sa.Integer(), nullable=True),
+        sa.Column("manager_mailbox", sa.String(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
