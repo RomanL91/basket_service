@@ -141,3 +141,22 @@ async def get_info_order_with_basket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Ордер с UUID {uuid_id!r} не найден.",
         )
+
+
+# GET ALL WITH PAGINATED AND FILTERING executive_id ===
+@router.get(
+    "/get_manager_order_archive/{manager_executive_id}/",
+    response_model=Page[schemas.ReadOrderPydantic],
+    summary="Получение ордеров, которые менеджер уже принял в обработку (!=NEW).",
+    description="""Нужен manager_executive_id для получения ордеров, 
+                с которыми менеджер работал ранее. Принимал или отклонял - 
+                все ордера с которыми он взаимодействовал.""",
+)
+async def get_manager_order_archive(
+    manager_executive_id: str,
+    params: Params_Depends,
+    uow: UOF_Depends,
+):
+    return await OrdertService().get_paginated_orders_by_filters(
+        uow=uow, params=params, manager_executive_id=manager_executive_id
+    )
