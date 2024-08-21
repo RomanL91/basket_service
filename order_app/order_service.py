@@ -68,3 +68,11 @@ class OrdertService:
             )  # Получаем базовый запрос на объекты Order
             result = await paginate(uow.session, query, params)
             return result
+
+    async def get_paginated_orders_by_filters(
+        self, uow: IUnitOfWork, params: Params, **kwargs
+    ) -> Page:
+        async with uow:
+            query = uow.order.get_objs_by_filters(**kwargs)
+            result = await paginate(uow.session, query, params)
+            return result

@@ -23,3 +23,7 @@ class OrderRepository(SQLAlchemyRepository):
         )
         res = await self.session.execute(stmt)
         return res.scalar_one()
+
+    def get_objs_by_filters(self, **filter_by):
+        stmt = select(self.model).filter_by(**filter_by).order_by(self.model.created_at)
+        return stmt
