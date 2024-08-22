@@ -140,3 +140,30 @@ async def create_or_update_basket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Ошибка? -> {error!r}.",
         )
+
+
+@router.patch(
+    "/{uuid_id}/{product_id}/",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.BasketItemUpdate,
+    summary="Изменить кол-во продукта в корзине или удалить его из нее.",
+    description="""
+                Принимает uuid_id корзины и product_id - это параметры для 
+                навигации (какой товар хотим удалить/изменить колличество).
+                В теле указывается поле count - для изменения кол-ва и поле 
+                delete - если истина, то удалит товар с корзины.
+                """,
+)
+async def basket_item_update(
+    uow: UOF_Depends,
+    uuid_id: str,
+    product_id: str,
+    data_item: schemas.BasketItemUpdate,
+):
+    await BascketService().basket_item_update(
+        uow,
+        uuid_id,
+        product_id,
+        data_item,
+    )
+    return data_item
