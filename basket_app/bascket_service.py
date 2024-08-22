@@ -171,5 +171,9 @@ class BascketService:
                 if data_item.delete:
                     basket.basket_items.remove(item)
                 item.update({"count": data_item.count})
-        bascket_update = BasketPydantic(uuid_id=uuid_id, basket_items=basket.basket_items)
-        await self.update_bascket(uow=uow, uuid_id=uuid_id, bascket_update=bascket_update)
+        bascket_update = BasketPydantic(
+            uuid_id=uuid_id, basket_items=basket.basket_items
+        )
+        await self.update_bascket(
+            uow=uow, uuid_id=uuid_id, bascket_update=bascket_update
+        )
