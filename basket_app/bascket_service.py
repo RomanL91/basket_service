@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from core import settings
 from core.base_UOW import IUnitOfWork
 from basket_app.models import Basket
-from basket_app.schemas import BasketPydantic
+from basket_app.schemas import BasketPydantic, BasketItemUpdate
 
 from typing import List
 
@@ -50,6 +50,15 @@ class BascketService:
         bascket_update: BasketPydantic,
         partial: bool = False,
     ) -> Basket:
+        # TODO повтор
+        prod_ids = (
+            [item["prod_id"] for item in bascket_update.basket_items]
+            if bascket_update.basket_items is not None
+            else []
+        )
+        product_details = await self.fetch_product_details(prod_ids, bascket_update)
+        bascket_update = product_details
+
         data = bascket_update.model_dump(exclude_unset=partial)
         async with uow:
             try:
@@ -148,3 +157,20 @@ class BascketService:
 
         except httpx.RequestError as e:
             print(f"Request error occurred: {e}")
+
+    async def basket_item_update(
+        self,
+        uow: IUnitOfWork,
+        uuid_id: str,
+        product_id: str,
+        data_item: BasketItemUpdate,
+    ) -> None:
+        basket = await self.get_bascket_by_uuid(uow=uow, uuid_id=uuid_id)
+        for item in basket.basket_items:
+            if item["prod_id"] == int(product_id):
+                if data_item.delete:
+                    basket.basket_items.remove(item)
+                item.update({"count": data_item.count})
+        d = {"uuid_id": uuid_id, "basket_items": basket.basket_items}
+        dd = BasketPydantic(**d)
+        await self.update_bascket(uow=uow, uuid_id=uuid_id, bascket_update=dd)
