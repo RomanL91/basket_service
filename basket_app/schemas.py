@@ -71,3 +71,24 @@ class BasketPydantic(BaseModel):
             description="Список подарков",
         ),
     ] = None
+
+
+class BasketItemUpdate(BaseModel):
+    model_config = ConfigDict(
+        strict=True,
+    )
+
+    count: Annotated[
+        int,
+        Field(
+            ...,
+            # description=
+        ),
+    ]
+    delete: Annotated[
+        bool,
+        Field(
+            ...,
+            # description=
+        ),
+    ] = False
