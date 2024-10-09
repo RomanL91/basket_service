@@ -4,6 +4,7 @@ from fastapi import APIRouter, Response, HTTPException, status
 from sqlalchemy.exc import NoResultFound
 
 # == My
+from order_app.schemas import OrderCreateSchema
 from order_app import schemas
 from api_v1.order_api.depends import UOF_Depends, Params_Depends
 from order_app.order_service import OrdertService
@@ -36,6 +37,20 @@ async def create_order(
             status_code=error.status_code, message=error.detail
         )
         return response_msg
+    
+@router.post(
+    "/create_order_test",
+    status_code=status.HTTP_201_CREATED,
+    # response_model=OrderCreateSchema, # нужна отдельная модель для ответа
+    # summary="Создание ордера.",
+    # description="Создай ордер. Смотри пример тела.",
+)
+async def create_order(
+    new_order: OrderCreateSchema, 
+    uow: UOF_Depends, 
+):
+    # пока пустнышка
+    return new_order
 
 
 # GET ALL       === === === === === === === ===
