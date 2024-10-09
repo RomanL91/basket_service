@@ -51,6 +51,8 @@ class Order(Base):
     )
     # Номер телефона для контакта
     phone_number: Mapped[str] = mapped_column()
+    # Email пользователя (необязательное поле)
+    email: Mapped[str] = mapped_column(nullable=True)
     # Город отгрузки
     shipping_city: Mapped[str] = mapped_column()
     # Адрес доставки
