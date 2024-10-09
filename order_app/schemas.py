@@ -9,6 +9,9 @@ class DeliveryType(str, Enum):
     DELIVERY = "DELIVERY"
     PICKUP = "PICKUP"
 
+class PaymentType(str, Enum):
+    ONLINE = "ONLINE"
+    OFFLINE = "OFFLINE"
 
 class OrderStatusType(str, Enum):
     NEW = "NEW"
