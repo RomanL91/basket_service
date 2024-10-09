@@ -1,8 +1,9 @@
 from enum import Enum
-from typing import Annotated
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated, Optional, Type
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
 
+from core.base_utils import check_token
 
 # Определение перечисления для типов доставки, аналогичное SQLAlchemy
 class DeliveryType(str, Enum):
@@ -20,7 +21,63 @@ class OrderStatusType(str, Enum):
     CANCELED = "CANCELED"
 
 
-# Pydantic модель
+class OrderCreateSchema(BaseModel):
+    # Настройки модели
+    model_config = ConfigDict(
+        strict=True, # мы строгие
+        # use_enum_values=True, # это до сих пор не работает
+        from_attributes=True, # напрямую из атрибутов объекта, а не из словаря
+        json_schema_extra={
+            "example": {
+                "user_full_name": "Иван Иванов",
+                "payment_type": PaymentType.ONLINE,
+                "uuid_id": "123e4567-e89b-12d3-a456-426614174000",
+                "phone_number": "+77001234567",
+                "delivery_address": "г. Алматы, ул. Ленина, д. 1",
+                "delivery_type": DeliveryType.DELIVERY,
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "comment": "Позвоните перед доставкой",
+                "email": "ivan@example.com",
+            }
+        }
+    )
+
+    @staticmethod
+    def validate_enum(value: str, enum_class: Type[Enum], field_name: str):
+        values = set(item.value for item in enum_class)
+        if value.islower() or value not in values:
+            raise ValueError(f"Поле '{field_name}' принимает только значения: {', '.join(values)}")
+        return value
+    
+    @field_validator('access_token')
+    def validate_jwt(jwt_value: str):
+        payload = check_token(jwt_value)
+        if not payload:
+            raise ValueError("Не валидный ключ!")
+        return payload
+    
+    # Валидатор для payment_type и delivery_type
+    @field_validator('payment_type', 'delivery_type')
+    def check_enum_fields(cls, v, info):
+        if info.field_name == 'payment_type':
+            return cls.validate_enum(v, PaymentType, 'payment_type')
+        if info.field_name == 'delivery_type':
+            return cls.validate_enum(v, DeliveryType, 'delivery_type')
+        return v
+    # Обязательные поля
+    user_full_name: Annotated[str, Field(description="ФИО пользователя, который создал заказ")] 
+    payment_type: Annotated[str, Field(description="Тип оплаты")]
+    uuid_id: Annotated[str, Field(description="UUID корзины, связанный с заказом")]
+    phone_number: Annotated[str, Field(description="Номер телефона для контакта")]
+    delivery_address: Annotated[str, Field(description="Адрес доставки")]
+    delivery_type: Annotated[str, Field(description="Тип доставки")]
+    access_token: Annotated[str, Field(description="JWT токен для доступа")]
+    # Необязательные поля
+    comment: Annotated[Optional[str], Field(None, description="Комментарий к заказу")] = None
+    email: Annotated[Optional[EmailStr], Field(None, description="Email пользователя")] = None
+
+
+# Pydantic модел
 class OrderPydantic(BaseModel):
     model_config = ConfigDict(
         strict=True,
