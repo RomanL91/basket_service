@@ -12,15 +12,15 @@ BASE_DIR = Path(__file__).parent.parent
 
 class SettingsDataBase(BaseModel):
     # for example "postgresql://user:password@localhost/dbname"
-    # url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
+    url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
     # docker url
     # url: str = (
     #     "postgresql+asyncpg://MyBasketUser:MyBasketPassword@postgres:5432/MyBasketDataBase"
     # )
     # local url
-    url: str = (
-        "postgresql+asyncpg://MyBasketUser:MyBasketPassword@localhost:5433/MyBasketDataBase"
-    )
+    # url: str = (
+    #     "postgresql+asyncpg://MyBasketUser:MyBasketPassword@localhost:5433/MyBasketDataBase"
+    # )
     echo: bool = True  # Для дебага
     future: bool = True
 
