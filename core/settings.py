@@ -29,6 +29,7 @@ class SettingsAuth(BaseModel):
     public_key_path: Path = BASE_DIR / "certs" / "public.pem"
     public_key: str = public_key_path.read_text()
     algorithm: str = "RS256"
+    allowed_key_type: str = "access_token"
 
 
 class SettingsCORSMiddleware(BaseModel):
