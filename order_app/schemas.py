@@ -4,6 +4,7 @@ from typing import Annotated, Optional, Type
 from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
 
 from core.base_utils import check_token
+from core.base_model import TokenSchema
 
 # Определение перечисления для типов доставки, аналогичное SQLAlchemy
 class DeliveryType(str, Enum):
@@ -71,7 +72,7 @@ class OrderCreateSchema(BaseModel):
     phone_number: Annotated[str, Field(description="Номер телефона для контакта")]
     delivery_address: Annotated[str, Field(description="Адрес доставки")]
     delivery_type: Annotated[str, Field(description="Тип доставки")]
-    access_token: Annotated[str, Field(description="JWT токен для доступа")]
+    access_token: TokenSchema
     # Необязательные поля
     comment: Annotated[Optional[str], Field(None, description="Комментарий к заказу")] = None
     email: Annotated[Optional[EmailStr], Field(None, description="Email пользователя")] = None
