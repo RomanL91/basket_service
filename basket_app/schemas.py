@@ -1,5 +1,12 @@
+from enum import Enum
 from typing import Annotated, List, Dict
 from pydantic import BaseModel, ConfigDict, Field
+
+
+# Определение этапов оформления
+class CheckoutStageSchema(str, Enum):
+    CREATED = 'CREATED'
+    IN_PROGRESS = 'IN_PROGRESS'
 
 
 class SimpleMSGErrorPydantic(BaseModel):

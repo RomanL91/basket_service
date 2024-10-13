@@ -9,12 +9,34 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from core import settings
 from core.base_UOW import IUnitOfWork
 from basket_app.models import Basket
+from core.base_model import TokenSchema
 from basket_app.schemas import BasketPydantic, BasketItemUpdate
 
 from typing import List
 
 
 class BascketService:
+    async def sign_basket(
+        self, uow: IUnitOfWork, uuid_id: str, access_token: TokenSchema
+    ):
+        try:
+            user_id = access_token.model_dump()["access_token"]["user_id"]
+            data = {"user_id": user_id}
+            async with uow:
+                basket = await uow.bascket.update_obj(uuid_id=uuid_id, data=data)
+                await uow.commit()
+                return basket
+        except KeyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Ключ не сожержит полезных данных.",
+            )
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Корзины {uuid_id!r} не существует.",
+            )
+
     async def create_bascket(
         self, uow: IUnitOfWork, new_bascket: BasketPydantic
     ) -> Basket | None:

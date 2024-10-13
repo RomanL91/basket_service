@@ -1,3 +1,4 @@
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -5,6 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 # from sqlalchemy.dialects.postgresql import JSON
 
 from core import Base
+
+from basket_app.schemas import CheckoutStageSchema
 
 
 class Basket(Base):
@@ -22,6 +25,12 @@ class Basket(Base):
     completed: Mapped[bool] = mapped_column(
         default=False,
         nullable=True,
+    )
+    # Этап оформления
+    checkout_stage: Mapped[CheckoutStageSchema] = mapped_column(
+        SQLEnum(CheckoutStageSchema),
+        nullable=False,
+        default=CheckoutStageSchema.CREATED
     )
     # список словарей {"count": 3, "prod_id": 2} - состав корзины
     basket_items: Mapped[list] = mapped_column(

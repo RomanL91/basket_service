@@ -4,6 +4,7 @@ from sqlalchemy.exc import NoResultFound
 
 # == My
 from basket_app import schemas
+from core.base_model import TokenSchema
 from api_v1.basket_api.depends import UOF_Depends
 from basket_app.bascket_service import BascketService
 
@@ -65,23 +66,6 @@ async def get_bascket_by_uuid(
         )
 
 
-# UPDATE PUT    === === === === === === === ===
-# @router.put(
-#     "/{uuid_id}/",
-#     response_model=schemas.BasketPydantic,
-#     summary="Обновит всю корзину.",
-#     description="В теле запроса можно указать то поле, которое нужно обновить.",
-# )
-# async def update_bascket(
-#     uow: UOF_Depends,
-#     uuid_id: str,
-#     bascket_update: schemas.BasketPydantic,
-# ):
-#     return await BascketService().update_bascket(
-#         uow=uow, uuid_id=uuid_id, bascket_update=bascket_update
-#     )
-
-
 # UPDATE PATCH  === === === === === === === ===
 @router.patch(
     "/{uuid_id}/",
@@ -97,6 +81,24 @@ async def update_bascket(
     return await BascketService().update_bascket(
         uow=uow, uuid_id=uuid_id, bascket_update=bascket_update, partial=True
     )
+
+@router.patch(
+    "/sign/{uuid_id}/",
+    response_model=schemas.BasketPydantic,
+    summary="Подписать корзину.",
+    description="""
+        Принимает в query uuid_id корзины, который сформировал клиентский код. 
+        В теле ожидатеся ключ доступа в котором зашифрован ID пользователя, 
+        которым и будет подписана корзина.
+        """,
+)
+async def sign_basket(
+    uow: UOF_Depends,
+    uuid_id: str,
+    access_token: TokenSchema
+):
+    basket = await BascketService().sign_basket(uow=uow, uuid_id=uuid_id, access_token=access_token)
+    return basket
 
 
 # DELETE        === === === === === === === ===
