@@ -34,3 +34,28 @@ class Base(DeclarativeBase):
         onupdate=get_current_time,
         nullable=True,
     )
+
+#  =========================== Pydantic model ===========================
+from typing import Annotated
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from core.base_utils import check_token
+
+
+class TokenSchema(BaseModel):
+    model_config = ConfigDict(
+        strict=True, # мы строгие
+        from_attributes=True, # напрямую из атрибутов объекта, а не из словаря
+        json_schema_extra={
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            }
+        }
+    )
+    access_token: Annotated[str, Field(description="JWT токен для доступа")]
+
+    @field_validator('access_token')
+    def validate_jwt(jwt_value: str):
+        payload = check_token(jwt_value)
+        if not payload:
+            raise ValueError("Не валидный ключ!")
+        return payload
