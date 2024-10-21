@@ -30,7 +30,7 @@ class Basket(Base):
     checkout_stage: Mapped[CheckoutStageSchema] = mapped_column(
         SQLEnum(CheckoutStageSchema),
         nullable=False,
-        default=CheckoutStageSchema.CREATED
+        default=CheckoutStageSchema.CREATED,
     )
     # список словарей {"count": 3, "prod_id": 2} - состав корзины
     basket_items: Mapped[list] = mapped_column(

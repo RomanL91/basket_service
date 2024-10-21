@@ -1,57 +1,112 @@
 # == Exceptions
 from fastapi import HTTPException, status
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 # == My
+from core import settings
 from core.base_UOW import IUnitOfWork
+from core.base_utils import get_total_sum_per_basket
+from order_app.api_bank import ApiPayBank
 from order_app.models import Order
-from order_app.schemas import OrderPydantic, OrderStatusType
+from order_app.schemas import (
+    OrderPydantic,
+    OrderStatusType,
+    OrderCreateSchema,
+    PaymentType,
+)
+from basket_app.schemas import CheckoutStageSchema
 
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 
 
 class OrdertService:
-    async def create_order(
-        self, uow: IUnitOfWork, new_order: OrderPydantic
-    ) -> Order | None:
-        order_dict = new_order.model_dump()
-        async with uow:
-            try:
-                order = await uow.order.create_obj(order_dict)
-                await uow.commit()
-                return order
-            except IntegrityError as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Ордер {new_order.uuid_id!r} уже существует.",
+    async def create_order(self, uow: IUnitOfWork, new_order: OrderCreateSchema):
+        comment = new_order.comment or ""
+        try:
+            async with uow:
+                basket = await uow.bascket.get_obj(
+                    uuid_id=new_order.uuid_id, completed=False
                 )
+                total_sum = get_total_sum_per_basket(
+                    shipping_city=new_order.shipping_city,
+                    basket_items=basket.basket_items,
+                )
+                user_id = new_order.access_token.model_dump().get("access_token")
+                order_dict = new_order.model_dump(exclude=["access_token"])
+                order_dict["user_id"] = user_id.get("user_id", None)
+                order_dict["total_amount"] = total_sum
+                order: Order = await uow.order.create_obj(order_dict)
+                basket.checkout_stage = CheckoutStageSchema.IN_PROGRESS
+                await uow.commit()
+                if new_order.payment_type == PaymentType.ONLINE:
+                    return await ApiPayBank.create_payment_link(
+                        invoice_id=str(order.account_number),
+                        amount=int(order.total_amount),
+                        description=comment,
+                        recipient_contact=order.email,
+                        recipient_contact_sms=order.phone_number,
+                        notifier_contact_sms=order.phone_number,
+                    )
+                else:
+                    return settings.api_bank.self_link_order_dateil
 
-    async def get_orders(self, uow: IUnitOfWork) -> list[Order]:
-        async with uow:
-            return await uow.order.get_all_objs()
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Упсс ... ограничения базы данных.",
+            )
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Не нашел корзину с {new_order.uuid_id!r} для создания заказа.",
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Для корзины {new_order.uuid_id!r} нарушена структура.",
+            )
 
-    async def get_order_by_uuid(self, uow: IUnitOfWork, uuid_id: str) -> Order:
-        async with uow:
-            return await uow.order.get_obj(uuid_id=uuid_id)
+    # async def create_order(
+    #     self, uow: IUnitOfWork, new_order: OrderPydantic
+    # ) -> Order | None:
+    #     order_dict = new_order.model_dump()
+    #     async with uow:
+    #         try:
+    #             order = await uow.order.create_obj(order_dict)
+    #             await uow.commit()
+    #             return order
+    #         except IntegrityError as e:
+    #             raise HTTPException(
+    #                 status_code=status.HTTP_400_BAD_REQUEST,
+    #                 detail=f"Ордер {new_order.uuid_id!r} уже существует.",
+    #             )
 
-    async def update_order(
-        self,
-        uow: IUnitOfWork,
-        uuid_id: str,
-        order_update: OrderPydantic,
-        partial: bool = False,
-    ) -> Order:
-        data = order_update.model_dump(exclude_unset=partial)
-        async with uow:
-            order = await uow.order.update_obj(uuid_id=uuid_id, data=data)
-            await uow.commit()
-            return order
+    # async def get_orders(self, uow: IUnitOfWork) -> list[Order]:
+    #     async with uow:
+    #         return await uow.order.get_all_objs()
 
-    async def delete_order(self, uow: IUnitOfWork, uuid_id: str) -> None:
-        async with uow:
-            await uow.order.delete_obj(uuid_id=uuid_id)
-            await uow.commit()
+    # async def get_order_by_uuid(self, uow: IUnitOfWork, uuid_id: str) -> Order:
+    #     async with uow:
+    #         return await uow.order.get_obj(uuid_id=uuid_id)
+
+    # async def update_order(
+    #     self,
+    #     uow: IUnitOfWork,
+    #     uuid_id: str,
+    #     order_update: OrderPydantic,
+    #     partial: bool = False,
+    # ) -> Order:
+    #     data = order_update.model_dump(exclude_unset=partial)
+    #     async with uow:
+    #         order = await uow.order.update_obj(uuid_id=uuid_id, data=data)
+    #         await uow.commit()
+    #         return order
+
+    # async def delete_order(self, uow: IUnitOfWork, uuid_id: str) -> None:
+    #     async with uow:
+    #         await uow.order.delete_obj(uuid_id=uuid_id)
+    #         await uow.commit()
 
     async def get_info_order_with_basket(self, uow: IUnitOfWork, uuid_id: str):
         async with uow:

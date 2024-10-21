@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import Annotated, List, Dict
+from typing import Annotated, Optional, List, Dict
 from pydantic import BaseModel, ConfigDict, Field
 
 
 # Определение этапов оформления
 class CheckoutStageSchema(str, Enum):
-    CREATED = 'CREATED'
-    IN_PROGRESS = 'IN_PROGRESS'
+    CREATED = "CREATED"
+    IN_PROGRESS = "IN_PROGRESS"
 
 
 class SimpleMSGErrorPydantic(BaseModel):
@@ -20,8 +20,6 @@ class BasketPydantic(BaseModel):
         json_schema_extra={
             "example": {
                 "uuid_id": "fcff9649-c7cc-498c-8ee2-c84785a68521",
-                # "user_id": 789,
-                # "completed": False,
                 "basket_items": [
                     {
                         "prod_id": 1,
@@ -48,9 +46,9 @@ class BasketPydantic(BaseModel):
         ),
     ] = None
     user_id: Annotated[
-        int | str | None,
+        Optional[str],
         Field(
-            ...,
+            str,
             description="Уникальный ID пользователя",
         ),
     ] = None

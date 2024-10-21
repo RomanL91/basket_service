@@ -16,24 +16,25 @@ class Order(Base):
     user_full_name: Mapped[str] = mapped_column(
         nullable=False,
     )
+    user_id: Mapped[int] = mapped_column(
+        nullable=False,
+    )
     # Общая сумма заказа, с точностью до двух десятичных знаков
     total_amount: Mapped[Decimal] = mapped_column(
-        DECIMAL(10, 2), 
-        nullable=False, 
+        DECIMAL(10, 2),
+        nullable=False,
         default=0.0,
     )
     # Номер счета для банка, автоматически генерируется
     account_number: Mapped[int] = mapped_column(
-        Integer, 
-        nullable=False, 
+        Integer,
+        nullable=False,
         unique=True,
         default=lambda: randint(100000000, 999999999),
     )
     # Тип оплаты
     payment_type: Mapped[PaymentType] = mapped_column(
-        SQLEnum(PaymentType),
-        nullable=False,
-        default=PaymentType.ONLINE
+        SQLEnum(PaymentType), nullable=False, default=PaymentType.ONLINE
     )
     # унаследуем от корзины
     uuid_id: Mapped[str] = mapped_column(
@@ -61,9 +62,7 @@ class Order(Base):
     )
     # Тип доставки, например "Самовывоз" или "Доставка продавца"
     delivery_type: Mapped[DeliveryType] = mapped_column(
-        SQLEnum(DeliveryType),
-        nullable=False,
-        default=DeliveryType.DELIVERY
+        SQLEnum(DeliveryType), nullable=False, default=DeliveryType.DELIVERY
     )
     # Связь с моделью корзины
     basket: Mapped["Basket"] = relationship(  # type: ignore

@@ -1,10 +1,10 @@
 from fastapi_pagination import Page
-from fastapi import APIRouter, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from sqlalchemy.exc import NoResultFound
 
 # == My
-from order_app.schemas import OrderCreateSchema
+from order_app.schemas import HttpUrl, OrderCreateSchema
 from order_app import schemas
 from api_v1.order_api.depends import UOF_Depends, Params_Depends
 from order_app.order_service import OrdertService
@@ -12,57 +12,66 @@ from order_app.order_service import OrdertService
 
 # TODO этот импорт не совсем уместен, нужен базовый класс пидантик исключений
 # а не таскать эту схему во все приложения
-from basket_app.schemas import SimpleMSGErrorPydantic
+# from basket_app.schemas import SimpleMSGErrorPydantic
 
 
 router = APIRouter(tags=["Order"])
 
 
 # CREATE        === === === === === === === ===
+# @router.post(
+#     "/",
+#     status_code=status.HTTP_201_CREATED,
+#     response_model=schemas.OrderPydantic | SimpleMSGErrorPydantic,
+#     summary="Создание ордера.",
+#     description="Создай ордер. Смотри пример тела.",
+# )
+# async def create_order(
+#     new_order: schemas.CreateOrderPydantic, uow: UOF_Depends, response: Response
+# ):
+#     try:
+#         return await OrdertService().create_order(uow=uow, new_order=new_order)
+#     except HTTPException as error:
+#         response.status_code = error.status_code
+#         response_msg = SimpleMSGErrorPydantic(
+#             status_code=error.status_code, message=error.detail
+#         )
+#         return response_msg
+
+
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=schemas.OrderPydantic | SimpleMSGErrorPydantic,
+    # response_model=HttpUrl,  # нужна отдельная модель для ответа
     summary="Создание ордера.",
-    description="Создай ордер. Смотри пример тела.",
+    description="""
+    Точка для создания ордера. 
+    Результатом данной точки является url ссылка, которая может вести как в ЛК пользователя,
+    так и на страницу оплаты, в зависимости от выбранного пользователем способом оплаты.
+    Так же есть возможность отдавать ссылку на страницу с ошибкой в случае, если от банка
+    не получена платежная ссылка, но код статус 2хх.
+    Для взаимодействия требуется ключ доступа типа access и годный по сроку давности.
+    Обязательные поля для точки помечены в схеме.
+    """,
 )
 async def create_order(
-    new_order: schemas.CreateOrderPydantic, uow: UOF_Depends, response: Response
+    new_order: OrderCreateSchema,
+    uow: UOF_Depends,
 ):
-    try:
-        return await OrdertService().create_order(uow=uow, new_order=new_order)
-    except HTTPException as error:
-        response.status_code = error.status_code
-        response_msg = SimpleMSGErrorPydantic(
-            status_code=error.status_code, message=error.detail
-        )
-        return response_msg
-    
-@router.post(
-    "/create_order_test",
-    status_code=status.HTTP_201_CREATED,
-    # response_model=OrderCreateSchema, # нужна отдельная модель для ответа
-    # summary="Создание ордера.",
-    # description="Создай ордер. Смотри пример тела.",
-)
-async def create_order(
-    new_order: OrderCreateSchema, 
-    uow: UOF_Depends, 
-):
-    # пока пустнышка
-    return new_order
+    link = await OrdertService().create_order(uow=uow, new_order=new_order)
+    return link
 
 
 # GET ALL       === === === === === === === ===
-@router.get(
-    "/",
-    response_model=list[schemas.ReadOrderPydantic],
-    summary="Получение всех ордеров.",
-    description="Скорее всего это не пригодиться, но пусть пока будет.",
-    deprecated=True,
-)
-async def get_orders(uow: UOF_Depends):
-    return await OrdertService().get_orders(uow)
+# @router.get(
+#     "/",
+#     response_model=list[schemas.ReadOrderPydantic],
+#     summary="Получение всех ордеров.",
+#     description="Скорее всего это не пригодиться, но пусть пока будет.",
+#     deprecated=True,
+# )
+# async def get_orders(uow: UOF_Depends):
+#     return await OrdertService().get_orders(uow)
 
 
 # GET ALL WITH PAGINATED    === === === === ===
@@ -87,52 +96,52 @@ async def get_orders(
 
 
 # GET           === === === === === === === ===
-@router.get(
-    "/{uuid_id}/",
-    response_model=schemas.OrderPydantic | SimpleMSGErrorPydantic,
-    summary="Получение экземпляра ордера по uuid_id.",
-    description="""Нужен uuid_id для получения экземпляра ордера. 
-                Вернет ордер с completed = False""",
-)
-async def get_order_by_uuid(
-    uuid_id: str,
-    uow: UOF_Depends,
-):
-    try:
-        return await OrdertService().get_order_by_uuid(uow=uow, uuid_id=uuid_id)
-    except NoResultFound as error:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Ордер с UUID {uuid_id!r} не найден.",
-        )
+# @router.get(
+#     "/{uuid_id}/",
+#     response_model=schemas.OrderPydantic | SimpleMSGErrorPydantic,
+#     summary="Получение экземпляра ордера по uuid_id.",
+#     description="""Нужен uuid_id для получения экземпляра ордера. 
+#                 Вернет ордер с completed = False""",
+# )
+# async def get_order_by_uuid(
+#     uuid_id: str,
+#     uow: UOF_Depends,
+# ):
+#     try:
+#         return await OrdertService().get_order_by_uuid(uow=uow, uuid_id=uuid_id)
+#     except NoResultFound as error:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"Ордер с UUID {uuid_id!r} не найден.",
+#         )
 
 
 # UPDATE PATCH  === === === === === === === ===
-@router.patch(
-    "/{uuid_id}/",
-    response_model=schemas.OrderPydantic,
-    summary="Обновит поле ордера.",
-    description="В теле запроса можно указать то поле, которое нужно обновить.",
-)
-async def update_order(
-    uow: UOF_Depends,
-    uuid_id: str,
-    order_update: schemas.OrderPydantic,
-):
-    return await OrdertService().update_order(
-        uow=uow, uuid_id=uuid_id, order_update=order_update, partial=True
-    )
+# @router.patch(
+#     "/{uuid_id}/",
+#     response_model=schemas.OrderPydantic,
+#     summary="Обновит поле ордера.",
+#     description="В теле запроса можно указать то поле, которое нужно обновить.",
+# )
+# async def update_order(
+#     uow: UOF_Depends,
+#     uuid_id: str,
+#     order_update: schemas.OrderPydantic,
+# ):
+#     return await OrdertService().update_order(
+#         uow=uow, uuid_id=uuid_id, order_update=order_update, partial=True
+#     )
 
 
 # DELETE        === === === === === === === ===
-@router.delete(
-    "/{uuid_id}/",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Удали ордер.",
-    description="Удалит ордер безвозвратно.",
-)
-async def delete_order(uow: UOF_Depends, uuid_id: str) -> None:
-    await OrdertService().delete_order(uow=uow, uuid_id=uuid_id)
+# @router.delete(
+#     "/{uuid_id}/",
+#     status_code=status.HTTP_204_NO_CONTENT,
+#     summary="Удали ордер.",
+#     description="Удалит ордер безвозвратно.",
+# )
+# async def delete_order(uow: UOF_Depends, uuid_id: str) -> None:
+#     await OrdertService().delete_order(uow=uow, uuid_id=uuid_id)
 
 
 # GET           === === === === === === === ===

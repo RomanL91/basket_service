@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from sqlalchemy.exc import NoResultFound
 
 # == My
 from basket_app import schemas
 from core.base_model import TokenSchema
-from api_v1.basket_api.depends import UOF_Depends
+from api_v1.basket_api.depends import UOF_Depends, Token_Depends
 from basket_app.bascket_service import BascketService
 
 
@@ -13,24 +13,24 @@ router = APIRouter(tags=["Bascket"])
 
 
 # CREATE        === === === === === === === ===
-@router.post(
-    "/",
-    status_code=status.HTTP_201_CREATED,
-    response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
-    summary="Создание корзины.",
-    description="Создай корзину. Смотри пример тела. Из обязательно 'uuid_id'.",
-)
-async def create_bascket(
-    new_bascket: schemas.BasketPydantic, uow: UOF_Depends, response: Response
-):
-    try:
-        return await BascketService().create_bascket(uow=uow, new_bascket=new_bascket)
-    except HTTPException as error:
-        response.status_code = error.status_code
-        response_msg = schemas.SimpleMSGErrorPydantic(
-            status_code=error.status_code, message=error.detail
-        )
-        return response_msg
+# @router.post(
+#     "/",
+#     status_code=status.HTTP_201_CREATED,
+#     response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
+#     summary="Создание корзины.",
+#     description="Создай корзину. Смотри пример тела. Из обязательно 'uuid_id'.",
+# )
+# async def create_bascket(
+#     new_bascket: schemas.BasketPydantic, uow: UOF_Depends, response: Response
+# ):
+#     try:
+#         return await BascketService().create_bascket(uow=uow, new_bascket=new_bascket)
+#     except HTTPException as error:
+#         response.status_code = error.status_code
+#         response_msg = schemas.SimpleMSGErrorPydantic(
+#             status_code=error.status_code, message=error.detail
+#         )
+#         return response_msg
 
 
 # GET ALL       === === === === === === === ===
@@ -47,7 +47,7 @@ async def get_basckets(uow: UOF_Depends):
 
 # GET           === === === === === === === ===
 @router.get(
-    "/{uuid_id}/",
+    "/by/{uuid_id}/",
     response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
     summary="Получение экземпляра корзины по uuid_id.",
     description="""Нужен uuid_id для получения экземпляра корзины. 
@@ -64,6 +64,21 @@ async def get_bascket_by_uuid(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Корзина с UUID {uuid_id!r} не найдена.",
         )
+    
+@router.get(
+    "/by_access_t/{access_token}/",
+    # response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
+    summary="Получение экземпляра корзины по access_token.",
+    # description="""Нужен uuid_id для получения экземпляра корзины. 
+    #             Вернет корзину с completed = False""",
+)
+async def get_basket_by_access_token(
+    access_token: Token_Depends,
+    uow: UOF_Depends,
+):
+    # if access_token:
+    #     return access_token
+    return 0
 
 
 # UPDATE PATCH  === === === === === === === ===
@@ -82,6 +97,7 @@ async def update_bascket(
         uow=uow, uuid_id=uuid_id, bascket_update=bascket_update, partial=True
     )
 
+
 @router.patch(
     "/sign/{uuid_id}/",
     response_model=schemas.BasketPydantic,
@@ -92,12 +108,10 @@ async def update_bascket(
         которым и будет подписана корзина.
         """,
 )
-async def sign_basket(
-    uow: UOF_Depends,
-    uuid_id: str,
-    access_token: TokenSchema
-):
-    basket = await BascketService().sign_basket(uow=uow, uuid_id=uuid_id, access_token=access_token)
+async def sign_basket(uow: UOF_Depends, uuid_id: str, access_token: TokenSchema):
+    basket = await BascketService().sign_basket(
+        uow=uow, uuid_id=uuid_id, access_token=access_token
+    )
     return basket
 
 
@@ -130,7 +144,6 @@ async def delete_bascket(uow: UOF_Depends, uuid_id: str) -> None:
 async def create_or_update_basket(
     new_bascket: schemas.BasketPydantic,
     uow: UOF_Depends,
-    response: Response,
 ):
     try:
         uuid_id = new_bascket.uuid_id
