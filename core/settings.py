@@ -46,7 +46,9 @@ class SettingsCORSMiddleware(BaseModel):
 class SettingsApiShop(BaseModel):
     host_addr_api: HttpUrl = "http://127.0.0.1:8000/"
     prod_by_ids_template: HttpUrl = "{host}api/v1/products/by_ids/{prod_ids_str}/"
-    url_admin_prod_detail: HttpUrl = "{host}admin/app_products/products/{prod_id}/change/"
+    url_admin_prod_detail: HttpUrl = (
+        "{host}admin/app_products/products/{prod_id}/change/"
+    )
     url_api_prod_detail: HttpUrl = "{host}api/v1/products/{prod_slug}/"
 
     def _format_url(self, template: str, **kwargs) -> HttpUrl:

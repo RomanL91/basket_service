@@ -1,7 +1,8 @@
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
+
 from basket_app.models import Basket
 from core.base_repository import SQLAlchemyRepository
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy import select
 
 
 class BascketRepository(SQLAlchemyRepository):

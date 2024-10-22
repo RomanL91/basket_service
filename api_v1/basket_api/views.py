@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Header, HTTPException, status
-
 from sqlalchemy.exc import NoResultFound
+
+from api_v1.basket_api.depends import Token_Depends, UOF_Depends
 
 # == My
 from basket_app import schemas
-from core.base_model import TokenSchema
-from api_v1.basket_api.depends import UOF_Depends, Token_Depends
 from basket_app.bascket_service import BascketService
-
+from core.base_model import TokenSchema
 
 router = APIRouter(tags=["Bascket"])
 
@@ -64,7 +63,8 @@ async def get_bascket_by_uuid(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Корзина с UUID {uuid_id!r} не найдена.",
         )
-    
+
+
 @router.get(
     "/by_access_t/",
     # response_model=,
@@ -74,19 +74,15 @@ async def get_bascket_by_uuid(
         Вернет корзину с completed = False.
         """,
 )
-async def get_basket_by_access_token(
-    uow: UOF_Depends,
-    access_token: Token_Depends
-):
+async def get_basket_by_access_token(uow: UOF_Depends, access_token: Token_Depends):
     try:
         data_token = TokenSchema(access_token=access_token)
         user_id = data_token.access_token.get("user_id")
-        basket = await BascketService().get_bascket_by_user_id(
-            uow=uow, user_id=user_id
-        )
+        basket = await BascketService().get_bascket_by_user_id(uow=uow, user_id=user_id)
         return basket
     except ValueError as e:
         raise HTTPException(400)
+
 
 # UPDATE PATCH  === === === === === === === ===
 @router.patch(

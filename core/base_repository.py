@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select, update, delete
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.engine import Result
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

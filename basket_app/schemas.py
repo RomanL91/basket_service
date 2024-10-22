@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Annotated, Optional, List, Dict
+from typing import Annotated, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 

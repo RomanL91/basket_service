@@ -1,13 +1,12 @@
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.types import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-# from sqlalchemy.dialects.postgresql import JSON
-
-from core import Base
+from sqlalchemy.types import JSON
 
 from basket_app.schemas import CheckoutStageSchema
+from core import Base
+
+# from sqlalchemy.dialects.postgresql import JSON
 
 
 class Basket(Base):

@@ -1,18 +1,19 @@
-import jwt
+from typing import List
+
 import httpx
+import jwt
 
 # == Exceptions
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
+from basket_app.models import Basket
+from basket_app.schemas import BasketItemUpdate, BasketPydantic
+
 # == My
 from core import settings
-from core.base_UOW import IUnitOfWork
-from basket_app.models import Basket
 from core.base_model import TokenSchema
-from basket_app.schemas import BasketPydantic, BasketItemUpdate
-
-from typing import List
+from core.base_UOW import IUnitOfWork
 
 
 class BascketService:

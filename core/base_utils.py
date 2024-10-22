@@ -1,6 +1,6 @@
-import jwt
-
 from decimal import Decimal
+
+import jwt
 
 from core import settings
 

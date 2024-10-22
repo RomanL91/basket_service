@@ -1,11 +1,6 @@
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped,
-    declared_attr,
-    mapped_column,
-)
-
 from datetime import datetime
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 from core import settings
 
@@ -38,7 +33,9 @@ class Base(DeclarativeBase):
 
 #  =========================== Pydantic model ===========================
 from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from core.base_utils import check_token
 
 

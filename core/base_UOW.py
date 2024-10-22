@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from core.db_manager import db_manager
-
 from basket_app.bascket_repository import BascketRepository
+from core.db_manager import db_manager
 from order_app.order_repository import OrderRepository
 
 

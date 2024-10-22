@@ -3,8 +3,8 @@ __all__ = (
     "Base",
 )
 
-from .settings import settings
-from .base_model import Base
+from core.base_model import Base
+from core.settings import settings
 
 # for migrations
 from basket_app.models import Basket
