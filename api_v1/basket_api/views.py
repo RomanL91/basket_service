@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, status
 
 from sqlalchemy.exc import NoResultFound
 
@@ -66,20 +66,27 @@ async def get_bascket_by_uuid(
         )
     
 @router.get(
-    "/by_access_t/{access_token}/",
-    # response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
-    summary="Получение экземпляра корзины по access_token.",
-    # description="""Нужен uuid_id для получения экземпляра корзины. 
-    #             Вернет корзину с completed = False""",
+    "/by_access_t/",
+    # response_model=,
+    summary="Получение экземпляра корзины через haeders access_token.",
+    description="""
+        Нужен валидный ключ. 
+        Вернет корзину с completed = False.
+        """,
 )
 async def get_basket_by_access_token(
-    access_token: Token_Depends,
     uow: UOF_Depends,
+    access_token: Token_Depends
 ):
-    # if access_token:
-    #     return access_token
-    return 0
-
+    try:
+        data_token = TokenSchema(access_token=access_token)
+        user_id = data_token.access_token.get("user_id")
+        basket = await BascketService().get_bascket_by_user_id(
+            uow=uow, user_id=user_id
+        )
+        return basket
+    except ValueError as e:
+        raise HTTPException(400)
 
 # UPDATE PATCH  === === === === === === === ===
 @router.patch(

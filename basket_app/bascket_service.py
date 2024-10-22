@@ -65,6 +65,16 @@ class BascketService:
         async with uow:
             return await uow.bascket.get_obj(uuid_id=uuid_id, completed=False)
 
+    async def get_bascket_by_user_id(self, uow: IUnitOfWork, user_id: str) -> Basket:
+        try:
+            async with uow:
+                return await uow.bascket.get_obj(user_id=user_id, completed=False)
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Корзины пользователя {user_id!r} не существует.",
+            )
+
     async def update_bascket(
         self,
         uow: IUnitOfWork,

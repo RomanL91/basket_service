@@ -52,7 +52,7 @@ class TokenSchema(BaseModel):
             }
         },
     )
-    access_token: Annotated[str, Field(description="JWT токен для доступа")]
+    access_token: Annotated[str | dict, Field(description="JWT токен для доступа")]
 
     @field_validator("access_token")
     def validate_jwt(jwt_value: str):

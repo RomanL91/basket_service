@@ -1,9 +1,8 @@
 from typing import Annotated
-from fastapi import Depends
+from fastapi import Depends, Header
 
 from core.base_UOW import IUnitOfWork, UnitOfWork
-from core.base_model import TokenSchema
 
 
 UOF_Depends = Annotated[IUnitOfWork, Depends(UnitOfWork)]
-Token_Depends = Annotated[TokenSchema, Depends(TokenSchema)]
+Token_Depends = Annotated[str, Header()]
