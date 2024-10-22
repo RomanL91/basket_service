@@ -11,27 +11,6 @@ from core.base_model import TokenSchema
 router = APIRouter(tags=["Bascket"])
 
 
-# CREATE        === === === === === === === ===
-# @router.post(
-#     "/",
-#     status_code=status.HTTP_201_CREATED,
-#     response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
-#     summary="Создание корзины.",
-#     description="Создай корзину. Смотри пример тела. Из обязательно 'uuid_id'.",
-# )
-# async def create_bascket(
-#     new_bascket: schemas.BasketPydantic, uow: UOF_Depends, response: Response
-# ):
-#     try:
-#         return await BascketService().create_bascket(uow=uow, new_bascket=new_bascket)
-#     except HTTPException as error:
-#         response.status_code = error.status_code
-#         response_msg = schemas.SimpleMSGErrorPydantic(
-#             status_code=error.status_code, message=error.detail
-#         )
-#         return response_msg
-
-
 # GET ALL       === === === === === === === ===
 @router.get(
     "/",
@@ -80,7 +59,7 @@ async def get_basket_by_access_token(uow: UOF_Depends, access_token: Token_Depen
         user_id = data_token.access_token.get("user_id")
         basket = await BascketService().get_bascket_by_user_id(uow=uow, user_id=user_id)
         return basket
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(400)
 
 

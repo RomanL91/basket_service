@@ -5,12 +5,13 @@ from sqlalchemy.exc import NoResultFound
 
 # == My
 from order_app.order_service import OrdertService
-from api_v1.order_api.depends import UOF_Depends, Params_Depends
+from api_v1.order_api.depends import UOF_Depends, Params_Depends, Token_Depends
 from order_app.schemas import (
     OrderCreateSchema,
     OrderPydantic,
     OrderStatusType,
     ReadOrderPydantic,
+    TokenSchema,
 )
 
 
@@ -81,6 +82,26 @@ async def get_info_order_with_basket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Ордер с UUID {uuid_id!r} не найден.",
         )
+
+
+# GET           === === === === === === === ===
+@router.get(
+    "/by_access_t/",
+    # response_model=,
+    summary="Получение экземпляров ордеров через haeders access_token.",
+    description="""
+        Нужен валидный ключ.
+        Вернет список ордеров пользователя.
+        """,
+)
+async def get_order_by_access_token(uow: UOF_Depends, access_token: Token_Depends):
+    try:
+        data_token = TokenSchema(access_token=access_token)
+        user_id = data_token.access_token.get("user_id")
+        orders = await OrdertService().get_orders_by_user_id(uow=uow, user_id=user_id)
+        return orders
+    except ValueError:
+        raise HTTPException(400)
 
 
 # GET ALL WITH PAGINATED AND FILTERING executive_id ===

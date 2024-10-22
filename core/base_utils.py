@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import jwt
 
-from core import settings
+from core.settings import settings
 
 
 def check_token(jwt_value: str) -> bool:

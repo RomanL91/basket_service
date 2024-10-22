@@ -27,3 +27,12 @@ class OrderRepository(SQLAlchemyRepository):
     def get_objs_by_filters(self, **filter_by):
         stmt = select(self.model).filter_by(**filter_by).order_by(self.model.created_at)
         return stmt
+
+    async def get_objs_to_user_id(self, user_id: str):
+        stmt = (
+            select(self.model)
+            .filter_by(user_id=user_id)
+            .order_by(self.model.created_at)
+        )
+        res = await self.session.execute(stmt)
+        return res.scalars().all()
