@@ -17,6 +17,11 @@ class PaymentType(str, Enum):
     OFFLINE = "OFFLINE"
 
 
+class PaymentStatus(str, Enum):
+    PAID = "PAID"
+    UNPAID = "UNPAID"
+
+
 class OrderStatusType(str, Enum):
     NEW = "NEW"
     INWORK = "INWORK"
@@ -216,3 +221,43 @@ class ReadOrderPydantic(OrderPydantic):
 
 class UpdateOrderPydantic(OrderPydantic):
     pass
+
+
+class TransactionPaymentSchema(BaseModel):
+    # Используем Annotated для задания типа и дополнительной метаинформации
+    account_id: Annotated[str, Field(alias="accountId")]
+    amount: Annotated[int, Field(gt=0)]  # Значение должно быть больше или равно 0
+    approval_code: Annotated[str, Field(alias="approvalCode")]
+    card_id: Annotated[str | None, Field(alias="cardId")] = None
+    card_mask: Annotated[str | None, Field(alias="cardMask")] = None
+    card_type: Annotated[str | None, Field(alias="cardType")] = None
+    code: str
+    currency: str
+    date_time: Annotated[datetime, Field(alias="dateTime")]
+    description: str | None = None
+    email: Optional[EmailStr] = None
+    # id: str
+    invoice_id: Annotated[int, Field(alias="invoiceId")]
+    ip: str | None = None
+    ip_city: Annotated[str | None, Field(alias="ipCity")] = None
+    ip_country: Annotated[str | None, Field(alias="ipCountry")] = None
+    ip_district: Annotated[str | None, Field(alias="ipDistrict")] = None
+    ip_latitude: Annotated[Optional[float], Field(alias="ipLatitude")] = None
+    ip_longitude: Annotated[Optional[float], Field(alias="ipLongitude")] = None
+    ip_region: Annotated[str | None, Field(alias="ipRegion")] = None
+    issuer: str | None = None
+    language: str | None = None
+    name: str | None = None
+    phone: str | None = None
+    reason: str
+    reason_code: Annotated[int, Field(alias="reasonCode")]
+    reference: str
+    secure: str | None = None
+    secure_details: Annotated[str | None, Field(alias="secureDetails")] = None
+    terminal: str
+
+    # Настройка модели через ConfigDict
+    model_config = ConfigDict(
+        populate_by_name=True,  # Разрешает доступ к полям по их "нормальному" имени
+        from_attributes=True,  # Поддержка создания моделей из объектов
+    )
