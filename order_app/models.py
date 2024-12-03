@@ -1,14 +1,15 @@
 from decimal import Decimal
 from random import randint
+from datetime import datetime
 
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Text, DECIMAL, Integer
+from sqlalchemy import ForeignKey, Text, DECIMAL, Integer, TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # from sqlalchemy.dialects.postgresql import JSON
 
 from core import Base
-from order_app.schemas import DeliveryType, OrderStatusType, PaymentType
+from order_app.schemas import DeliveryType, OrderStatusType, PaymentType, PaymentStatus
 
 
 class Order(Base):
@@ -16,7 +17,8 @@ class Order(Base):
     user_full_name: Mapped[str] = mapped_column(
         nullable=False,
     )
-    user_id: Mapped[int] = mapped_column(
+    user_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
         nullable=False,
     )
     # Общая сумма заказа, с точностью до двух десятичных знаков
@@ -45,6 +47,10 @@ class Order(Base):
     order_status: Mapped[OrderStatusType] = mapped_column(
         SQLEnum(OrderStatusType), default=OrderStatusType.NEW
     )
+    # статус платежа ордера [оплачено, неоплачено]
+    payment_status: Mapped[PaymentStatus] = mapped_column(
+        SQLEnum(PaymentStatus), default=PaymentStatus.UNPAID
+    )
     # комментарий к заявке от пользователя
     comment: Mapped[str] = mapped_column(
         Text,
@@ -69,6 +75,10 @@ class Order(Base):
         "Basket",
         back_populates="orders",
     )
+    # Связь с платежами
+    transactions: Mapped["TransactionPayment"] = relationship(
+        "TransactionPayment", back_populates="order", cascade="all, delete-orphan"
+    )
     manager_executive: Mapped[str] = mapped_column(
         nullable=True,
     )
@@ -81,6 +91,50 @@ class Order(Base):
 
     def __str__(self):
         return f"Order id={self.id}, uuid_id={self.uuid_id!r})"
+
+    def __repr__(self):
+        return str(self)
+
+
+# куда ж ты городишь это...
+class TransactionPayment(Base):
+    account_id: Mapped[str] = mapped_column(nullable=False)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)
+    approval_code: Mapped[str] = mapped_column(nullable=False)
+    card_id: Mapped[str | None] = mapped_column(nullable=True)
+    card_mask: Mapped[str | None] = mapped_column(nullable=True)
+    card_type: Mapped[str | None] = mapped_column(nullable=True)
+    code: Mapped[str] = mapped_column(nullable=False)
+    currency: Mapped[str] = mapped_column(nullable=False)
+    date_time: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False
+    )
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    email: Mapped[str | None] = mapped_column(nullable=True)
+    ip: Mapped[str] = mapped_column(nullable=True)
+    ip_city: Mapped[str | None] = mapped_column(nullable=True)
+    ip_country: Mapped[str | None] = mapped_column(nullable=True)
+    ip_district: Mapped[str | None] = mapped_column(nullable=True)
+    ip_latitude: Mapped[float | None] = mapped_column(nullable=True)
+    ip_longitude: Mapped[float | None] = mapped_column(nullable=True)
+    ip_region: Mapped[str | None] = mapped_column(nullable=True)
+    issuer: Mapped[str | None] = mapped_column(nullable=True)
+    language: Mapped[str | None] = mapped_column(nullable=True)
+    name: Mapped[str | None] = mapped_column(nullable=True)
+    phone: Mapped[str | None] = mapped_column(nullable=True)
+    reason: Mapped[str] = mapped_column(nullable=False)
+    reason_code: Mapped[int] = mapped_column(Integer, nullable=False)
+    reference: Mapped[str] = mapped_column(unique=True, nullable=False)
+    secure: Mapped[str | None] = mapped_column(nullable=True)
+    secure_details: Mapped[str | None] = mapped_column(nullable=True)
+    terminal: Mapped[str] = mapped_column(nullable=False)
+    invoice_id: Mapped[str] = mapped_column(
+        ForeignKey("orders.account_number"), nullable=False
+    )
+    order: Mapped["Order"] = relationship("Order", back_populates="transactions")
+
+    def __str__(self):
+        return f"Transaction {self.account_id!r}, amount {self.amount!r}"
 
     def __repr__(self):
         return str(self)
