@@ -7,11 +7,13 @@ from core import settings
 from core.base_UOW import IUnitOfWork
 from core.base_utils import get_total_sum_per_basket
 from order_app.api_bank import ApiPayBank
-from order_app.models import Order
+from order_app.models import Order, TransactionPayment
 from order_app.schemas import (
     OrderStatusType,
     OrderCreateSchema,
     PaymentType,
+    PaymentStatus,
+    TransactionPaymentSchema,
 )
 from basket_app.schemas import CheckoutStageSchema
 
@@ -93,3 +95,29 @@ class OrdertService:
             query = uow.order.get_objs_by_filters(**kwargs)
             result = await paginate(uow.session, query, params)
             return result
+
+    async def accepting_payment(
+        self, uow: IUnitOfWork, new_payment: TransactionPaymentSchema
+    ):
+        try:
+            new_payment_dict = new_payment.model_dump()
+            async with uow:
+                payment: TransactionPayment = await uow.payment.create_obj(
+                    new_payment_dict
+                )
+                order: Order = await uow.order.get_obj(
+                    account_number=new_payment.invoice_id
+                )
+                if order.total_amount != payment.amount:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Платеж не соотвествует сумме ордера.",
+                    )
+                order.payment_status = PaymentStatus.PAID
+                await uow.commit()
+            return None
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Упсс ... ограничения базы данных.",
+            )
