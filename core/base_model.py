@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
+from sqlalchemy import TIMESTAMP
+from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 from core import settings
@@ -7,7 +9,7 @@ from core import settings
 
 # функция получения времени
 def get_current_time():
-    return datetime.now(settings.time_zone).replace(tzinfo=None)
+    return datetime.now(timezone.utc)
 
 
 class Base(DeclarativeBase):
@@ -21,10 +23,12 @@ class Base(DeclarativeBase):
         primary_key=True,
     )
     created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),  # Указание на временную зону
         default=get_current_time,
         nullable=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),  # Указание на временную зону
         default=get_current_time,
         onupdate=get_current_time,
         nullable=True,
