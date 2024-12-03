@@ -1,26 +1,26 @@
+import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from dotenv import load_dotenv
 
 from pydantic import BaseModel, HttpUrl
 from pydantic_settings import BaseSettings
 
 from fastapi.middleware.cors import CORSMiddleware
 
-
 BASE_DIR = Path(__file__).parent.parent
+load_dotenv(".env")
 
 
 class SettingsDataBase(BaseModel):
     # for example "postgresql://user:password@localhost/dbname"
-    url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
+    # url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
     # docker url
     # url: str = (
     #     "postgresql+asyncpg://MyBasketUser:MyBasketPassword@postgres:5432/MyBasketDataBase"
     # )
     # local url
-    # url: str = (
-    #     "postgresql+asyncpg://MyBasketUser:MyBasketPassword@localhost:5433/MyBasketDataBase"
-    # )
+    url: str = os.getenv("DATABASE_URL")
     echo: bool = True  # Для дебага
     future: bool = True
 
@@ -69,8 +69,8 @@ class SettingsApiShop(BaseModel):
 class SettingsApiBank(BaseModel):
     # =================================================================
     # ссылки на которых "завязана" логика получения платежной ссылки
-    auth_url: HttpUrl = "https://testoauth.homebank.kz/epay2/oauth2/token"
-    pay_link_url: HttpUrl = "https://testepay.homebank.kz/api/invoice"
+    auth_url: HttpUrl = os.getenv("AUTH_URL")
+    pay_link_url: HttpUrl = os.getenv("PAY_LINK_URL")
 
     # =================================================================
     # данные для получения токена доступа от банка
@@ -80,40 +80,36 @@ class SettingsApiBank(BaseModel):
     scope: str = (
         "webapi usermanagement email_send verification statement statistics payment"  # ресурс
     )
-    username: str = "cthtufgbv@mail.ru"
-    password: str = "2hwQzGY@hx"
-    client_id: str = (
-        "web"  # Идентификатор коммерсанта, можно получить в кабинете, выдается при регистрации
-    )
-    client_secret: str = (
-        "h$PvhiWrLn*d)B5I"  # Ключ доступа коммерсанта, можно получить в кабинете, выдается при регистрации
-    )
+    username: str = os.getenv("USERNAMEAPI")
+    password: str = os.getenv("PASSWORD")
+    client_id: str = os.getenv("CLIENT_ID")
+    client_secret: str = os.getenv("CLIENT_SECRET")
 
     # =================================================================
     # статическая часть данных для "полезной нагрузки" для получения конкретной ссылки на оплату
     # --->> ID магазина, выдается системой при регистрации магазина, обязательное
-    shop_id: str = "04f25a4b-d2bd-4dd8-b3a7-9390be4774c4"
+    shop_id: str = os.getenv("SHOP_ID")
     # --->> номер счета магазина в системе epay, генериурется коммерсантом, обязательное
     account_id: str = "001"
     # --->> язык, на котором должна быть представлена информация о счете (допустимые значения: "rus", "kaz", "eng"), обязательное
     language: str = "rus"
     # --->> период действия счета. Формат: "[число][единица времени]", где единица времени может принимать значение "d" (дни). Например, "2d" - счет действителен в течение двух дней, обязательное
-    expire_period: str = "1d"
+    expire_period: str = os.getenv("EXPIRE_PERIOD")
     # --->> валюта счета (допустимые значения: "KZT"), обязательное
     currency: str = "KZT"
     # --->> URL-адрес, на который будет отправлен POST-запрос после успешной оплаты счета.
-    post_link: HttpUrl = "https://www.google.kz/?hl=ru"
+    post_link: HttpUrl = os.getenv("POST_LINK")
     # --->> URL-адрес, на который будет отправлен POST-запрос в случае неуспешной оплаты счета.
-    failure_post_link: HttpUrl = "https://www.google.kz/?hl=ru"
+    failure_post_link: HttpUrl = os.getenv("FAIURE_POST_LINK")
     # --->> Ссылка для возврата в магазин при удачном платеже.
-    back_link: HttpUrl = "https://www.google.kz/?hl=ru"
+    back_link: HttpUrl = os.getenv("BACK_LINK")
     # --->> Ссылка для возврата в магазин при неудачном платеже.
-    failure_back_link: HttpUrl = "https://www.google.kz/?hl=ru"
+    failure_back_link: HttpUrl = os.getenv("FAILURE_BACK_LINK")
 
     # =================================================================
     # ссылка для редиректа в случае если пользователь выбрал "оплата при получении"
     # --->> Ссылка для возврата в магазин если пользователь выбрал "наличный" способ.
-    self_link_order_dateil: HttpUrl = "http://example.com/"
+    self_link_order_dateil: HttpUrl = os.getenv("SELF_LINK_ORDER_DETAIL")
     # --->> Ссылка на страницу, если в ответе от банка нет "invoice_url" для редиректа на платежную страницу.
     self_link_redirect_not_successful: HttpUrl = "http://example.com/"
 
@@ -121,9 +117,9 @@ class SettingsApiBank(BaseModel):
 class Settings(BaseSettings):
     # == start app
     app: str = "main:app"
-    host: str = "0.0.0.0"
-    port: int = 8989
-    reload_flag: bool = True
+    host: str = os.getenv("HOST")
+    port: int = os.getenv("PORT")
+    reload_flag: bool = os.getenv("RELOAD")
 
     # == other
     api_v1_prefix: str = "/basket_api/v1"
