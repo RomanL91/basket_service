@@ -1,8 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
-from order_app.models import Order
+from order_app.models import Order, TransactionPayment
 from core.base_repository import SQLAlchemyRepository
+
+
+class TransactionPaymentRepository(SQLAlchemyRepository):
+    model = TransactionPayment
 
 
 class OrderRepository(SQLAlchemyRepository):
