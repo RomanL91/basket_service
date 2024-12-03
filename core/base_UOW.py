@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from basket_app.bascket_repository import BascketRepository
 from core.db_manager import db_manager
-from order_app.order_repository import OrderRepository
+from order_app.order_repository import OrderRepository, TransactionPaymentRepository
 
 
 class IUnitOfWork(ABC):
@@ -32,6 +32,7 @@ class UnitOfWork:
         # для работы
         self.bascket = BascketRepository(self.session)
         self.order = OrderRepository(self.session)
+        self.payment = TransactionPaymentRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.session.close()
