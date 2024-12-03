@@ -1,38 +1,18 @@
-version: '3.8'
-
 services:
   app:
+    container_name: basket_service
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
     ports:
       - "8989:8989"
-    depends_on:
-      - postgres
-    # entrypoint: ["/app/entrypoint.sh"]
+    env_file:
+      - .env
     command: python main.py
     networks:
-      - fastapibasket
+      - backend
 
-  postgres:
-    image: postgres:15.4
-    volumes:
-      - postgres_data_basket:/var/lib/postgresql/data/
-    restart: always
-    environment:
-      - POSTGRES_USER=MyBasketUser
-      - POSTGRES_PASSWORD=MyBasketPassword
-      - POSTGRES_DB=MyBasketDataBase
-    ports:
-      - 5434:5432
-    networks:
-      - fastapibasket
-
-volumes:
-  postgres_data_basket:
-  cache:
-    driver: local
 networks:
-    fastapibasket:
-        driver: bridge
+  backend:
+    external: true
