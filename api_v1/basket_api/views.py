@@ -14,10 +14,10 @@ router = APIRouter(tags=["Bascket"])
 # GET ALL       === === === === === === === ===
 @router.get(
     "/",
-    response_model=list[schemas.BasketPydantic],
+    # response_model=list[schemas.BasketPydantic2],
     summary="Получение списка корзин.",
     description="Можно получить список всех корзин. А нафиг? Пока пусть будет.",
-    # deprecated=True,
+    deprecated=True,
 )
 async def get_basckets(uow: UOF_Depends):
     return await BascketService().get_baskets(uow)
@@ -26,7 +26,7 @@ async def get_basckets(uow: UOF_Depends):
 # GET           === === === === === === === ===
 @router.get(
     "/by/{uuid_id}/",
-    response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
+    # response_model=schemas.BasketPydantic | schemas.SimpleMSGErrorPydantic,
     summary="Получение экземпляра корзины по uuid_id.",
     description="""Нужен uuid_id для получения экземпляра корзины. 
                 Вернет корзину с completed = False""",
@@ -52,6 +52,7 @@ async def get_bascket_by_uuid(
         Нужен валидный ключ. 
         Вернет корзину с completed = False.
         """,
+    deprecated=True,
 )
 async def get_basket_by_access_token(uow: UOF_Depends, access_token: Token_Depends):
     try:
@@ -69,6 +70,7 @@ async def get_basket_by_access_token(uow: UOF_Depends, access_token: Token_Depen
     response_model=schemas.BasketPydantic,
     summary="Обновит поле корзины.",
     description="В теле запроса можно указать то поле, которое нужно обновить.",
+    deprecated=True,
 )
 async def update_bascket(
     uow: UOF_Depends,
@@ -89,6 +91,7 @@ async def update_bascket(
         В теле ожидатеся ключ доступа в котором зашифрован ID пользователя, 
         которым и будет подписана корзина.
         """,
+    deprecated=True,
 )
 async def sign_basket(uow: UOF_Depends, uuid_id: str, access_token: TokenSchema):
     basket = await BascketService().sign_basket(
@@ -102,7 +105,8 @@ async def sign_basket(uow: UOF_Depends, uuid_id: str, access_token: TokenSchema)
     "/{uuid_id}/",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Удали корзину.",
-    description="Удалит корзину безвозвратно.",
+    description="Удалит корзину безвозвратно. **`Постарайся не удалять корзины этим способом`**",
+    deprecated=True,
 )
 async def delete_bascket(uow: UOF_Depends, uuid_id: str) -> None:
     await BascketService().delete_bascket(uow=uow, uuid_id=uuid_id)
@@ -122,6 +126,7 @@ async def delete_bascket(uow: UOF_Depends, uuid_id: str) -> None:
         500: {"description": "Да пошел ты!"},
     },
     response_description="Информация о корзине.",
+    deprecated=True,
 )
 async def create_or_update_basket(
     new_bascket: schemas.BasketPydantic,
@@ -150,6 +155,7 @@ async def create_or_update_basket(
                 В теле указывается поле count - для изменения кол-ва и поле 
                 delete - если истина, то удалит товар с корзины.
                 """,
+    deprecated=True,
 )
 async def basket_item_update(
     uow: UOF_Depends,
@@ -164,3 +170,30 @@ async def basket_item_update(
         data_item,
     )
     return data_item
+
+
+@router.post(
+    "/update_or_create/",
+    summary="Создай и получи корзину.",
+    description="""
+        Пересмотренная логика.<br>
+        Не хватало возможности создавать корзину `[]` или `null` - теперь это сделано.<br>
+        В общем, для создании корзины нужно только `uuid_id` и всё..<br>
+        Но если у тебя есть `JWT` (причем подойдет даже refresh), что значит, что пользователь идентифицирован, тогда предоставь его. 
+        Этим можно сразу и **подписать** корзину за определенным пользователем.<br>
+        В поле `basket_items` добавляй ID товаров (int).<br><hr>
+        <h2>Предположительные вопросы???</h2>
+        **Как добавить несколько товаров с одним ID?**<br>
+        - Просто добавь и добейся списка такго вида [76, 76, 76, 34, 76, 34, 55] - где 76 встречается
+        4 раза, 34 - 2 раза, а 55 - 1 раз.<br>
+        *Если такой вариант не удобен или не нравится, можем `обсудить`.*
+    """,
+)
+async def update_or_create_basket(
+    new_bascket: schemas.BasketPydantic2,
+    uow: UOF_Depends,
+):
+    uuid_id = new_bascket.uuid_id
+    return await BascketService().create_or_update_bascket_2(
+        uow=uow, uuid_id=uuid_id, bascket_data=new_bascket
+    )
