@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from basket_app.models import Basket
-from basket_app.schemas import BasketItemUpdate, BasketPydantic
+from basket_app.schemas import BasketItemUpdate, BasketPydantic, BasketPydantic2
 
 # == My
 from core import settings
@@ -138,6 +138,26 @@ class BascketService:
                     detail=f"Ошибка при создании или обновлении корзины {uuid_id!r}.",
                 )
 
+    async def create_or_update_bascket_2(
+        self, uow: IUnitOfWork, uuid_id: str, bascket_data: BasketPydantic2
+    ) -> Basket:
+        # достаем ИД пользователя из JWT
+        user_id = self.extract_user_id_from_jwt(bascket_data.user_id)
+        bascket_data.user_id = user_id
+        bascket_dict = bascket_data.model_dump()
+        async with uow:
+            try:
+                bascket = await uow.bascket.create_or_update(
+                    uuid_id=uuid_id, data=bascket_dict
+                )
+                await uow.commit()
+                return bascket
+            except IntegrityError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Ошибка при создании или обновлении корзины {uuid_id!r}.",
+                )
+
     # TODO можно вынести в файл/класс утилит ==============================
     # функция утилита для извлечения ИД из токена
     def extract_user_id_from_jwt(self, jwt_token: str | None) -> int | None:
@@ -156,10 +176,11 @@ class BascketService:
     ) -> BasketPydantic:
         prod_ids_str = ",".join(map(str, prod_ids))
         url = settings.api_shop.get_prod_by_ids(prod_ids_str=prod_ids_str)
+        print(f"-----------URL--------->>>> {url}")
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url)
-                response.raise_for_status()  # Проверка на HTTP ошибки
+                # response.raise_for_status()  # Проверка на HTTP ошибки
                 details_dict = {detail["id"]: detail for detail in response.json()}
                 list_prod_gifts_ids = []
                 for item in new_bascket.basket_items:
@@ -186,9 +207,11 @@ class BascketService:
                 new_bascket.gift_items = response_gift_prod.json()
                 return new_bascket
         except httpx.HTTPStatusError as e:
+            return []
             raise AttributeError("Корзине нужны продукты")
 
         except httpx.RequestError as e:
+            return []
             print(f"Request error occurred: {e}")
 
     async def basket_item_update(
