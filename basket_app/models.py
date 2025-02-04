@@ -1,5 +1,6 @@
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, Text, DECIMAL, Integer, TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
@@ -17,7 +18,8 @@ class Basket(Base):
     # уникальный код от клиентской стороны
     uuid_id: Mapped[str] = mapped_column()
     # id пользователя, если набирал корзину аутентифицированным (достать с JWT)
-    user_id: Mapped[int] = mapped_column(
+    user_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
         nullable=True,
     )
     # стаус корзины, сменяется на TRUE если на корзину заключен ордер
