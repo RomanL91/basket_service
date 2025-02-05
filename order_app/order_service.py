@@ -23,7 +23,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 class OrdertService:
     async def create_order(self, uow: IUnitOfWork, new_order: OrderCreateSchema):
-        comment = new_order.comment or ""
+        comment = new_order.comment or "=)"
         try:
             async with uow:
                 basket = await uow.bascket.get_obj(
