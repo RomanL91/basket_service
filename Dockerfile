@@ -13,10 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Открываем порт, на котором будет работать FastAPI
-EXPOSE 8989
+EXPOSE ${PORT}
 
 # Делаем скрипт исполняемым
 RUN chmod +x /app/entrypoint.sh
-
-# Устанавливаем скрипт как точку входа
-# ENTRYPOINT ["/app/entrypoint.sh"]

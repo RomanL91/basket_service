@@ -1,17 +1,17 @@
 services:
   app:
-    container_name: basket_service
+    container_name: basket_service_2
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "8989:8989"
     env_file:
       - .env
-    command: python main.py
+    ports:
+      - "${PORT}:${PORT}"
     networks:
       - backend
+    entrypoint: [ "sh", "/app/entrypoint.sh" ]
 
 networks:
   backend:
