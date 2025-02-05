@@ -1,5 +1,8 @@
+from datetime import datetime, timezone, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import NoResultFound
 
 from order_app.models import Order, TransactionPayment
 from core.base_repository import SQLAlchemyRepository
@@ -40,3 +43,20 @@ class OrderRepository(SQLAlchemyRepository):
         )
         res = await self.session.execute(stmt)
         return res.scalars().all()
+
+    async def get_obj(
+        self,
+        max_age_days: int | None = None,
+        **filter_by,
+    ):
+        stmt = select(self.model).filter_by(**filter_by)
+
+        if max_age_days is not None and hasattr(self.model, "created_at"):
+            min_date = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+            stmt = stmt.where(self.model.created_at >= min_date)
+        try:
+            res = await self.session.execute(stmt)
+            res = res.scalar_one()
+            return res
+        except NoResultFound:
+            return None
