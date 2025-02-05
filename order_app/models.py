@@ -41,7 +41,7 @@ class Order(Base):
     # унаследуем от корзины
     uuid_id: Mapped[str] = mapped_column(
         ForeignKey("baskets.uuid_id"),
-        unique=True,
+        unique=False,
     )
     # статус заявки [новая, в работе, выполнена]
     order_status: Mapped[OrderStatusType] = mapped_column(
@@ -78,6 +78,10 @@ class Order(Base):
     # Связь с платежами
     transactions: Mapped["TransactionPayment"] = relationship(
         "TransactionPayment", back_populates="order", cascade="all, delete-orphan"
+    )
+    # Поле для хранения ссылки на платежку банка
+    payment_link: Mapped[str] = mapped_column(
+        nullable=True,
     )
     manager_executive: Mapped[str] = mapped_column(
         nullable=True,
