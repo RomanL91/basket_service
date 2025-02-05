@@ -44,8 +44,8 @@ class SettingsCORSMiddleware(BaseModel):
 
 
 class SettingsApiShop(BaseModel):
-    host_addr_api: HttpUrl = "http://127.0.0.1:8000/"
-    prod_by_ids_template: HttpUrl = "{host}api/v1/products/by_ids/{prod_ids_str}/"
+    host_addr_api: HttpUrl = os.getenv("HOST_ADDR_API")
+    prod_by_ids_template: HttpUrl = "{host}api/v2/products_v2/filter_by_ids/"
     url_admin_prod_detail: HttpUrl = (
         "{host}admin/app_products/products/{prod_id}/change/"
     )
@@ -94,7 +94,12 @@ class SettingsApiBank(BaseModel):
     # --->> язык, на котором должна быть представлена информация о счете (допустимые значения: "rus", "kaz", "eng"), обязательное
     language: str = "rus"
     # --->> период действия счета. Формат: "[число][единица времени]", где единица времени может принимать значение "d" (дни). Например, "2d" - счет действителен в течение двух дней, обязательное
-    expire_period: str = os.getenv("EXPIRE_PERIOD")
+    _expire_period: str = os.getenv("EXPIRE_PERIOD")
+
+    @property
+    def expire_period(self):
+        return int(self._expire_period[:1])
+
     # --->> валюта счета (допустимые значения: "KZT"), обязательное
     currency: str = "KZT"
     # --->> URL-адрес, на который будет отправлен POST-запрос после успешной оплаты счета.
