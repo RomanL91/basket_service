@@ -8,12 +8,13 @@ from core.base_UOW import IUnitOfWork
 from core.base_utils import get_total_sum_per_basket
 from order_app.api_bank import ApiPayBank
 from order_app.models import Order, TransactionPayment
+from basket_app.models import Basket
 from order_app.schemas import (
     OrderStatusType,
     OrderCreateSchema,
     PaymentType,
     PaymentStatus,
-    TransactionPaymentSchema,
+    BankCallbackModel,
 )
 from basket_app.schemas import CheckoutStageSchema
 
@@ -30,7 +31,9 @@ class OrdertService:
                     uuid_id=new_order.uuid_id, completed=False
                 )
                 if basket is None:
-                    raise ValueError()
+                    raise ValueError(
+                        "Нет корзины. Возможно, она уже оформлена 'completed=True'"
+                    )
                 total_sum = get_total_sum_per_basket(
                     shipping_city=new_order.shipping_city,
                     basket_items=basket.basket_items,
@@ -112,17 +115,50 @@ class OrdertService:
             result = await paginate(uow.session, query, params)
             return result
 
-    async def accepting_payment(
-        self, uow: IUnitOfWork, new_payment: TransactionPaymentSchema
-    ):
+    async def accepting_payment(self, uow: IUnitOfWork, new_payment: BankCallbackModel):
         try:
             new_payment_dict = new_payment.model_dump()
+            invoice_id = int(new_payment_dict.get("invoice_id"))
+            new_payment_dict["invoice_id"] = invoice_id
+
             async with uow:
-                payment: TransactionPayment = await uow.payment.create_obj(
-                    new_payment_dict
+                payment: TransactionPayment = await uow.payment.create_obj_pay(
+                    account_id=new_payment.account_id,
+                    amount=new_payment.amount,
+                    approval_code=new_payment.approval_code,
+                    card_id=new_payment.card_id,
+                    card_mask=new_payment.card_mask,
+                    card_type=new_payment.card_type,
+                    code=new_payment.code,
+                    currency=new_payment.currency,
+                    date_time=new_payment.date_time,
+                    description=new_payment.description,
+                    email=new_payment.email,
+                    ip=new_payment.ip,
+                    ip_city=new_payment.ip_city,
+                    ip_country=new_payment.ip_country,
+                    ip_district=new_payment.ip_district,
+                    ip_latitude=new_payment.ip_latitude,
+                    ip_longitude=new_payment.ip_longitude,
+                    ip_region=new_payment.ip_region,
+                    issuer=new_payment.issuer,
+                    language=new_payment.language,
+                    name=new_payment.name,
+                    phone=new_payment.phone,
+                    reason=new_payment.reason,
+                    reason_code=new_payment.reason_code,
+                    reference=new_payment.reference,
+                    secure=new_payment.secure,
+                    secure_details=new_payment.secure_details,
+                    terminal=new_payment.terminal,
+                    invoice_id=int(new_payment.invoice_id),
                 )
                 order: Order = await uow.order.get_obj(
-                    account_number=new_payment.invoice_id
+                    account_number=int(new_payment.invoice_id)
+                )
+                basket: Basket = await uow.bascket.update_ob_pay(
+                    uuid_id=order.uuid_id,
+                    data={"completed": True, "user_id": order.user_id},
                 )
                 if order.total_amount != payment.amount:
                     raise HTTPException(
