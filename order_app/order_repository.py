@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import NoResultFound
 
@@ -10,6 +10,11 @@ from core.base_repository import SQLAlchemyRepository
 
 class TransactionPaymentRepository(SQLAlchemyRepository):
     model = TransactionPayment
+
+    async def create_obj_pay(self, **data: dict):
+        stmt = insert(self.model).values(**data).returning(self.model)
+        res = await self.session.execute(stmt)
+        return res.scalar_one()
 
 
 class OrderRepository(SQLAlchemyRepository):
