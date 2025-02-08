@@ -1,8 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 
 from basket_app.models import Basket
 from core.base_repository import SQLAlchemyRepository
+
+from basket_app.schemas import CheckoutStageSchema
 
 
 class BascketRepository(SQLAlchemyRepository):
@@ -27,3 +29,20 @@ class BascketRepository(SQLAlchemyRepository):
             return await self.update_obj(uuid_id, data)
         except NoResultFound as error:
             return await self.create_obj(data)
+
+    async def update_ob_pay(self, uuid_id: str, data: dict):
+        stmt = (
+            update(self.model)
+            .values(**data)
+            .filter_by(
+                uuid_id=uuid_id,
+                completed=False,
+                checkout_stage=CheckoutStageSchema.IN_PROGRESS,
+            )
+            .returning(self.model)
+        )
+        try:
+            res = await self.session.execute(stmt)
+            return res.scalar_one()
+        except Exception:
+            pass
