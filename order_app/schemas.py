@@ -1,7 +1,16 @@
+from uuid import UUID
 from enum import Enum
+from decimal import Decimal
 from datetime import datetime
 from typing import Annotated, Optional, Type
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator, HttpUrl
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    EmailStr,
+    field_validator,
+    AwareDatetime,
+)
 
 from core.base_model import TokenSchema
 
@@ -223,38 +232,37 @@ class UpdateOrderPydantic(OrderPydantic):
     pass
 
 
-class TransactionPaymentSchema(BaseModel):
-    # Используем Annotated для задания типа и дополнительной метаинформации
+class BankCallbackModel(BaseModel):
     account_id: Annotated[str, Field(alias="accountId")]
-    amount: Annotated[int, Field(gt=0)]  # Значение должно быть больше или равно 0
-    approval_code: Annotated[str, Field(alias="approvalCode")]
-    card_id: Annotated[str | None, Field(alias="cardId")] = None
-    card_mask: Annotated[str | None, Field(alias="cardMask")] = None
-    card_type: Annotated[str | None, Field(alias="cardType")] = None
-    code: str
-    currency: str
-    date_time: Annotated[datetime, Field(alias="dateTime")]
-    description: str | None = None
-    email: Optional[EmailStr] = None
-    # id: str
-    invoice_id: Annotated[int, Field(alias="invoiceId")]
-    ip: str | None = None
-    ip_city: Annotated[str | None, Field(alias="ipCity")] = None
-    ip_country: Annotated[str | None, Field(alias="ipCountry")] = None
-    ip_district: Annotated[str | None, Field(alias="ipDistrict")] = None
-    ip_latitude: Annotated[Optional[float], Field(alias="ipLatitude")] = None
-    ip_longitude: Annotated[Optional[float], Field(alias="ipLongitude")] = None
-    ip_region: Annotated[str | None, Field(alias="ipRegion")] = None
-    issuer: str | None = None
-    language: str | None = None
-    name: str | None = None
-    phone: str | None = None
-    reason: str
+    amount: Annotated[Decimal, Field(gt=0)]
+    approval_code: Annotated[Optional[str], Field(alias="approvalCode", default=None)]
+    card_id: Annotated[Optional[str], Field(alias="cardId", default=None)]
+    card_mask: Annotated[str, Field(alias="cardMask")]
+    card_type: Annotated[str, Field(alias="cardType")]
+    code: Annotated[str, Field(alias="code")]
+    currency: Annotated[str, Field(alias="currency")]
+    date_time: Annotated[AwareDatetime, Field(alias="dateTime")]
+    description: Annotated[Optional[str], Field(alias="description", default=None)]
+    email: Annotated[Optional[str], Field(alias="email", default=None)]
+    id: Annotated[UUID, Field(alias="id")]
+    invoice_id: Annotated[str, Field(alias="invoiceId")]
+    ip: Annotated[str, Field(alias="ip")]
+    ip_city: Annotated[Optional[str], Field(alias="ipCity", default=None)]
+    ip_country: Annotated[Optional[str], Field(alias="ipCountry", default=None)]
+    ip_district: Annotated[Optional[str], Field(alias="ipDistrict", default=None)]
+    ip_latitude: Annotated[Optional[float], Field(alias="ipLatitude", default=None)]
+    ip_longitude: Annotated[Optional[float], Field(alias="ipLongitude", default=None)]
+    ip_region: Annotated[Optional[str], Field(alias="ipRegion", default=None)]
+    issuer: Annotated[Optional[str], Field(alias="issuer", default=None)]
+    language: Annotated[Optional[str], Field(alias="language", default=None)]
+    name: Annotated[Optional[str], Field(alias="name", default=None)]
+    phone: Annotated[Optional[str], Field(alias="phone", default=None)]
+    reason: Annotated[str, Field(alias="reason")]
     reason_code: Annotated[int, Field(alias="reasonCode")]
-    reference: str
-    secure: str | None = None
-    secure_details: Annotated[str | None, Field(alias="secureDetails")] = None
-    terminal: str
+    reference: Annotated[str, Field(alias="reference")]
+    secure: Annotated[str, Field(alias="secure")]
+    secure_details: Annotated[Optional[str], Field(alias="secureDetails", default=None)]
+    terminal: Annotated[str, Field(alias="terminal")]
 
     # Настройка модели через ConfigDict
     model_config = ConfigDict(
