@@ -82,16 +82,9 @@ class ApiPayBank:
     async def _post_request(cls, url, data, handler: RequestHandler, headers=None):
         headers = headers or {}
         request = handler.prepare_request(url, headers, data)
-        print(f"--- [DEBUG] handler: {handler!r}")
-        print(f"--- [DEBUG] data: {data!r}")
         async with AsyncClient() as client:
             try:
                 response = await client.send(request)
-
-                # ВРЕМЕННО: печатаем статус и текст ответа
-                print(f"--- [DEBUG] Bank response text: {response.text!r}")
-                print(f"--- [DEBUG] Bank response text: {response.text!r}")
-
                 return response.json()
             except HTTPError as e:
                 raise ValueError(f"Что же пошло не так..: {str(e)}")
@@ -102,7 +95,6 @@ class ApiPayBank:
         response_data = await cls._post_request(
             url=cls.auth_url, data=payload_data, handler=FormUrlEncodedRequestHandler()
         )
-        print(f"--- [DEBUG] --- response_data --- > {response_data}")
         token = response_data.get("access_token")
         if not token:
             raise ValueError("Нет ключа доступа для проведения оплаты.")
