@@ -75,7 +75,7 @@ class SettingsApiBank(BaseModel):
     # =================================================================
     # данные для получения токена доступа от банка
     grant_type: str = (
-        "password"  # тип авторизации, для проведения платежа используется тип client_credentials (а тут password...)
+        "client_credentials"  # тип авторизации, для проведения платежа используется тип client_credentials (а тут password...)
     )
     scope: str = (
         "webapi usermanagement email_send verification statement statistics payment"  # ресурс
