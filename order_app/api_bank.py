@@ -71,7 +71,7 @@ class ApiPayBank:
         shop_id: str = settings.api_bank.shop_id
         account_id: str = settings.api_bank.account_id
         language: str = settings.api_bank.language
-        expire_period: str = settings.api_bank._expire_period
+        expire_period: str = settings.api_bank.expire_period
         currency: str = settings.api_bank.currency
         post_link: str = settings.api_bank.post_link
         failure_post_link: str = settings.api_bank.failure_post_link
