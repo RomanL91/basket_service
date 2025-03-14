@@ -85,6 +85,11 @@ class ApiPayBank:
         async with AsyncClient() as client:
             try:
                 response = await client.send(request)
+
+                # ВРЕМЕННО: печатаем статус и текст ответа
+                print(f"[DEBUG] Bank response status: {response.status_code}")
+                print(f"[DEBUG] Bank response text: {response.text!r}")
+
                 return response.json()
             except HTTPError as e:
                 raise ValueError(f"Что же пошло не так..: {str(e)}")
