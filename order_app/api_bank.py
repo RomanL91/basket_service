@@ -95,6 +95,7 @@ class ApiPayBank:
         response_data = await cls._post_request(
             url=cls.auth_url, data=payload_data, handler=FormUrlEncodedRequestHandler()
         )
+        print(f"--- [DEBUG] --- response_data --- > {response_data}")
         token = response_data.get("access_token")
         if not token:
             raise ValueError("Нет ключа доступа для проведения оплаты.")
