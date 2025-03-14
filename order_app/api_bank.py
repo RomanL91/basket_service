@@ -82,13 +82,15 @@ class ApiPayBank:
     async def _post_request(cls, url, data, handler: RequestHandler, headers=None):
         headers = headers or {}
         request = handler.prepare_request(url, headers, data)
+        print(f"--- [DEBUG] handler: {handler!r}")
+        print(f"--- [DEBUG] data: {data!r}")
         async with AsyncClient() as client:
             try:
                 response = await client.send(request)
 
                 # ВРЕМЕННО: печатаем статус и текст ответа
-                print(f"[DEBUG] Bank response status: {response.status_code}")
-                print(f"[DEBUG] Bank response text: {response.text!r}")
+                print(f"--- [DEBUG] Bank response text: {response.text!r}")
+                print(f"--- [DEBUG] Bank response text: {response.text!r}")
 
                 return response.json()
             except HTTPError as e:
