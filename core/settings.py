@@ -12,6 +12,23 @@ BASE_DIR = Path(__file__).parent.parent
 load_dotenv(".env")
 
 
+class SettingsPhonePrefix(BaseModel):
+    raw_mobile: str = os.getenv("MOBILE_PREFIXES", "")
+    raw_geo: str = os.getenv("GEOGRAPHIC_PREFIXES", "")
+
+    @property
+    def mobile_prefixes(self) -> set[str]:
+        return set(p.strip() for p in self.raw_mobile.split(",") if p.strip())
+
+    @property
+    def geographic_prefixes(self) -> set[str]:
+        return set(p.strip() for p in self.raw_geo.split(",") if p.strip())
+
+    @property
+    def all_valid_prefixes(self) -> set[str]:
+        return self.mobile_prefixes | self.geographic_prefixes
+
+
 class SettingsDataBase(BaseModel):
     # for example "postgresql://user:password@localhost/dbname"
     # url: str = f"sqlite+aiosqlite:///{BASE_DIR}/db.sqlite3"
@@ -129,6 +146,9 @@ class Settings(BaseSettings):
     # == other
     api_v1_prefix: str = "/basket_api/v1"
     time_zone: ZoneInfo = ZoneInfo("Asia/Almaty")
+    phone_prefix: SettingsPhonePrefix = (
+        SettingsPhonePrefix()
+    )  # префиксы +Х<ПРЕФИКС>ХХХ-ХХ-ХХ
 
     # == DataBase
     db: SettingsDataBase = SettingsDataBase()

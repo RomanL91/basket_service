@@ -1,3 +1,4 @@
+import re
 from uuid import UUID
 from enum import Enum
 from decimal import Decimal
@@ -12,6 +13,7 @@ from pydantic import (
     AwareDatetime,
 )
 
+from core import settings
 from core.base_model import TokenSchema
 
 
@@ -36,6 +38,9 @@ class OrderStatusType(str, Enum):
     INWORK = "INWORK"
     COMPLITED = "COMPLITED"
     CANCELED = "CANCELED"
+
+
+FULL_NAME_REGEX = re.compile(r"^[a-zA-Zа-яА-ЯёЁ\s\-]+$")
 
 
 class OrderCreateSchema(BaseModel):
@@ -78,6 +83,34 @@ class OrderCreateSchema(BaseModel):
             return cls.validate_enum(v, PaymentType, "payment_type")
         if info.field_name == "delivery_type":
             return cls.validate_enum(v, DeliveryType, "delivery_type")
+        return v
+
+    @field_validator("user_full_name")
+    def validate_user_full_name(cls, v):
+        if not FULL_NAME_REGEX.fullmatch(v):
+            raise ValueError(
+                "Имя может содержать только буквы кириллицы или латиницы, пробелы и дефисы."
+            )
+        return v
+
+    @field_validator("phone_number")
+    def validate_phone_number(cls, v):
+        v = v.replace(" ", "").replace("-", "")
+
+        if v.startswith("+7"):
+            digits = v[2:]
+        elif v.startswith("8"):
+            digits = v[1:]
+        else:
+            raise ValueError("Номер должен начинаться с '+7' или '8'.")
+
+        if not digits.isdigit() or len(digits) != 10:
+            raise ValueError("Номер должен содержать 10 цифр после '+7' или '8'.")
+
+        prefix = digits[:3]
+        if prefix not in settings.phone_prefix.all_valid_prefixes:
+            raise ValueError(f"Недопустимый префикс номера: {prefix}")
+
         return v
 
     # Обязательные поля
@@ -186,50 +219,11 @@ class OrderPydantic(BaseModel):
             examples=["Ivanov@example.com"],
         ),
     ] = None
-    # created_at: Annotated[
-    #     datetime | None,
-    #     Field(
-    #         ...,
-    #         description="Время создания ордера в системе.",
-    #         examples=["2024-08-07T23:54:51.628882"],
-    #     ),
-    # ] = None
-    # updated_at: Annotated[
-    #     datetime | None,
-    #     Field(
-    #         ...,
-    #         description="Время обновления ордера в системе.",
-    #         examples=["2024-08-07T23:54:51.628882"],
-    #     ),
-    # ] = None
-
-
-class CreateOrderPydantic(OrderPydantic):
-    model_config = ConfigDict(
-        strict=True,
-        json_schema_extra={
-            "example": {
-                "uuid_id": "fcff9649-c7cc-498c-8ee2-c84785a68521",
-                "phone_number": "+77714658976",
-                "shipping_city": "Астана",
-                "delivery_address": "Улица Достык, 8/4.",
-            }
-        },
-    )
-
-    uuid_id: str
-    phone_number: str
-    shipping_city: str
-    delivery_address: str
 
 
 class ReadOrderPydantic(OrderPydantic):
     created_at: datetime | None
     updated_at: datetime | None
-
-
-class UpdateOrderPydantic(OrderPydantic):
-    pass
 
 
 class BankCallbackModel(BaseModel):
