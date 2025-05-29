@@ -219,50 +219,11 @@ class OrderPydantic(BaseModel):
             examples=["Ivanov@example.com"],
         ),
     ] = None
-    # created_at: Annotated[
-    #     datetime | None,
-    #     Field(
-    #         ...,
-    #         description="Время создания ордера в системе.",
-    #         examples=["2024-08-07T23:54:51.628882"],
-    #     ),
-    # ] = None
-    # updated_at: Annotated[
-    #     datetime | None,
-    #     Field(
-    #         ...,
-    #         description="Время обновления ордера в системе.",
-    #         examples=["2024-08-07T23:54:51.628882"],
-    #     ),
-    # ] = None
-
-
-class CreateOrderPydantic(OrderPydantic):
-    model_config = ConfigDict(
-        strict=True,
-        json_schema_extra={
-            "example": {
-                "uuid_id": "fcff9649-c7cc-498c-8ee2-c84785a68521",
-                "phone_number": "+77714658976",
-                "shipping_city": "Астана",
-                "delivery_address": "Улица Достык, 8/4.",
-            }
-        },
-    )
-
-    uuid_id: str
-    phone_number: str
-    shipping_city: str
-    delivery_address: str
 
 
 class ReadOrderPydantic(OrderPydantic):
     created_at: datetime | None
     updated_at: datetime | None
-
-
-class UpdateOrderPydantic(OrderPydantic):
-    pass
 
 
 class BankCallbackModel(BaseModel):
